@@ -1,0 +1,17 @@
+# Entornos virtuales
+venv/
+env/
+
+# Archivos de caché de Python
+__pycache__/
+*.pyc
+
+# Base de datos local (por seguridad)
+db.sqlite3
+
+# Archivos estáticos y multimedia subidos por usuarios
+media/
+objetos_fotos/
+
+# Configuraciones de VS Code
+.vscode/

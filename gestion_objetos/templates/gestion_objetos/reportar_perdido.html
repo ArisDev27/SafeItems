@@ -1,0 +1,59 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reportar Objeto Perdido - SafeItems</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+</head>
+<body class="bg-[#f3f4f6] font-sans flex h-screen overflow-hidden items-center justify-center">
+
+    <div class="bg-white p-8 rounded-3xl shadow-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-gray-100">
+        
+        <!-- Encabezado -->
+        <div class="flex items-center gap-4 mb-6 pb-4 border-b border-gray-100">
+            <a href="{% url 'inicio' %}" class="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-gray-500 hover:bg-gray-200 transition">
+                <i class="bi bi-arrow-left text-xl"></i>
+            </a>
+            <div>
+                <h2 class="text-2xl font-extrabold text-[#0B402B]">Reportar objeto perdido</h2>
+                <p class="text-sm text-gray-500">Completa los datos para que la comunidad te ayude a encontrarlo.</p>
+            </div>
+        </div>
+
+<!-- Formulario -->
+        <!-- El enctype es OBLIGATORIO para poder subir la foto del objeto -->
+        <form method="POST" enctype="multipart/form-data" class="space-y-5">
+            {% csrf_token %}
+            
+            <!-- Formulario Organizado en Grid -->
+            <div class="bg-gray-50 p-6 rounded-2xl border border-gray-200 shadow-inner">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Recorremos los campos dinámicamente -->
+                    {% for field in form %}
+                        <div class="flex flex-col space-y-1.5 {% if field.name == 'foto' or field.name == 'pregunta_seguridad' or field.name == 'respuesta_seguridad' %}md:col-span-2{% endif %}">
+                            <label for="{{ field.id_for_label }}" class="font-bold text-gray-700 text-sm ml-1">
+                                {{ field.label }}
+                            </label>
+                            {{ field }}
+                            <!-- Muestra errores en rojo si el usuario llena algo mal -->
+                            {% if field.errors %}
+                                <p class="text-red-500 text-xs font-semibold ml-1">{{ field.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Botón de Publicar Reporte -->
+            <div class="flex justify-end pt-4">
+                <button type="submit" class="bg-[#0B402B] text-white px-8 py-3 rounded-xl font-bold hover:bg-[#082E20] transition shadow-md flex items-center gap-2">
+                    <i class="bi bi-send"></i> Publicar Reporte
+                </button>
+            </div>
+        </form>
+
+</body>
+</html>
