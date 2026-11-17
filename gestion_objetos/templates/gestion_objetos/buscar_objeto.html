@@ -1,0 +1,619 @@
+{% extends 'gestion_objetos/base.html' %}
+
+{% block titulo_documento %}
+
+Buscar objeto - SafeItems
+
+{% endblock %}
+
+{% block titulo_pagina %}
+
+Buscar objeto
+
+{% endblock %}
+
+{% block contenido %}
+
+<div class="p-5 md:p-8 max-w-7xl mx-auto space-y-6">
+
+    <div class="bg-gradient-to-r from-[#D0ECD7] to-[#E8F8EE] rounded-2xl p-6 md:p-8 border border-[#bce2c7]">
+
+        <h1 class="text-2xl md:text-3xl font-bold text-[#0B402B]">
+
+            Buscar objetos
+
+        </h1>
+
+        <p class="text-[#217351] text-sm md:text-base mt-2">
+
+            Consulta los objetos perdidos y encontrados por la comunidad universitaria.
+
+        </p>
+
+    </div>
+
+    {% if messages %}
+
+        {% for message in messages %}
+
+            <div role="alert" class="flex items-start gap-3 px-4 py-3 rounded-xl border text-sm
+
+                {% if message.tags == 'error' %}
+
+                    bg-red-50 text-red-700 border-red-200
+
+                {% elif message.tags == 'success' %}
+
+                    bg-green-50 text-green-800 border-green-200
+
+                {% else %}
+
+                    bg-blue-50 text-blue-800 border-blue-200
+
+                {% endif %}">
+
+                <i class="bi bi-info-circle-fill mt-0.5"></i>
+
+                <span>{{ message }}</span>
+
+            </div>
+
+        {% endfor %}
+
+    {% endif %}
+
+    <form method="get" action="{% url 'buscar_objeto' %}" class="space-y-6">
+
+        <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-4">
+
+            <div class="flex flex-col sm:flex-row gap-3">
+
+                <div class="relative flex-1">
+
+                    <i class="bi bi-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-lg"></i>
+
+                    <input
+
+                        type="search"
+
+                        name="q"
+
+                        value="{{ q }}"
+
+                        placeholder="¿Qué objeto estás buscando?"
+
+                        class="w-full pl-12 pr-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0B402B]/20 focus:border-[#0B402B] text-sm"
+
+                    >
+
+                </div>
+
+                <button
+
+                    type="submit"
+
+                    class="bg-[#0B402B] hover:bg-[#135A3E] text-white font-semibold px-7 py-3 rounded-xl transition">
+
+                    <i class="bi bi-search mr-2"></i>
+
+                    Buscar
+
+                </button>
+
+            </div>
+
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start">
+
+            <aside class="lg:col-span-1 bg-white rounded-2xl border border-gray-200 shadow-sm p-5 space-y-5">
+
+                <div class="flex items-center justify-between">
+
+                    <h2 class="text-lg font-bold text-[#0B402B]">
+
+                        <i class="bi bi-sliders mr-2"></i>
+
+                        Filtros
+
+                    </h2>
+
+                    <a
+
+                        href="{% url 'buscar_objeto' %}"
+
+                        class="text-xs font-semibold text-[#217351] hover:underline">
+
+                        Limpiar
+
+                    </a>
+
+                </div>
+
+                <div>
+
+                    <label for="filtroTipo" class="block text-sm font-semibold text-gray-700 mb-2">
+
+                        Tipo de reporte
+
+                    </label>
+
+                    <select
+
+                        id="filtroTipo"
+
+                        name="tipo"
+
+                        class="w-full px-3 py-3 rounded-xl bg-gray-50 border border-gray-200 text-sm focus:outline-none focus:border-[#0B402B]">
+
+                        <option value="">Todos</option>
+
+                        <option value="PERDIDO" {% if tipo == 'PERDIDO' %}selected{% endif %}>
+
+                            Perdidos
+
+                        </option>
+
+                        <option value="ENCONTRADO" {% if tipo == 'ENCONTRADO' %}selected{% endif %}>
+
+                            Encontrados
+
+                        </option>
+
+                    </select>
+
+                </div>
+
+                <div>
+
+                    <label for="filtroCategoria" class="block text-sm font-semibold text-gray-700 mb-2">
+
+                        Categoría
+
+                    </label>
+
+                    <select
+
+                        id="filtroCategoria"
+
+                        name="categoria"
+
+                        class="w-full px-3 py-3 rounded-xl bg-gray-50 border border-gray-200 text-sm focus:outline-none focus:border-[#0B402B]">
+
+                        <option value="">Todas las categorías</option>
+
+                        <option value="Electrónica" {% if categoria == 'Electrónica' %}selected{% endif %}>Electrónica</option>
+
+                        <option value="Llaves" {% if categoria == 'Llaves' %}selected{% endif %}>Llaves</option>
+
+                        <option value="Bolsos" {% if categoria == 'Bolsos' %}selected{% endif %}>Bolsos</option>
+
+                        <option value="Útiles académicos" {% if categoria == 'Útiles académicos' %}selected{% endif %}>Útiles académicos</option>
+
+                        <option value="Ropa y accesorios" {% if categoria == 'Ropa y accesorios' %}selected{% endif %}>Ropa y accesorios</option>
+
+                        <option value="Termos y recipientes" {% if categoria == 'Termos y recipientes' %}selected{% endif %}>Termos y recipientes</option>
+
+                        <option value="Artículos deportivos" {% if categoria == 'Artículos deportivos' %}selected{% endif %}>Artículos deportivos</option>
+
+                        <option value="Artículos personales" {% if categoria == 'Artículos personales' %}selected{% endif %}>Artículos personales</option>
+
+                        <option value="Otros" {% if categoria == 'Otros' %}selected{% endif %}>Otros</option>
+
+                    </select>
+
+                </div>
+
+                <div>
+
+                    <label for="filtroColor" class="block text-sm font-semibold text-gray-700 mb-2">
+
+                        Color
+
+                    </label>
+
+                    <input
+
+                        type="text"
+
+                        id="filtroColor"
+
+                        name="color"
+
+                        value="{{ color }}"
+
+                        placeholder="Ej. Negro"
+
+                        class="w-full px-3 py-3 rounded-xl bg-gray-50 border border-gray-200 text-sm focus:outline-none focus:border-[#0B402B]"
+
+                    >
+
+                </div>
+
+                <div>
+
+                    <label for="filtroMarca" class="block text-sm font-semibold text-gray-700 mb-2">
+
+                        Marca
+
+                    </label>
+
+                    <input
+
+                        type="text"
+
+                        id="filtroMarca"
+
+                        name="marca"
+
+                        value="{{ marca }}"
+
+                        placeholder="Ej. Samsung"
+
+                        class="w-full px-3 py-3 rounded-xl bg-gray-50 border border-gray-200 text-sm focus:outline-none focus:border-[#0B402B]"
+
+                    >
+
+                </div>
+
+                <div>
+
+                    <label for="filtroLugar" class="block text-sm font-semibold text-gray-700 mb-2">
+
+                        Lugar
+
+                    </label>
+
+                    <input
+
+                        type="text"
+
+                        id="filtroLugar"
+
+                        name="lugar"
+
+                        value="{{ lugar }}"
+
+                        placeholder="Ej. Biblioteca"
+
+                        class="w-full px-3 py-3 rounded-xl bg-gray-50 border border-gray-200 text-sm focus:outline-none focus:border-[#0B402B]"
+
+                    >
+
+                </div>
+
+                <div>
+
+                    <label for="filtroFecha" class="block text-sm font-semibold text-gray-700 mb-2">
+
+                        Fecha del suceso
+
+                    </label>
+
+                    <input
+
+                        type="date"
+
+                        id="filtroFecha"
+
+                        name="fecha"
+
+                        value="{{ fecha }}"
+
+                        class="w-full px-3 py-3 rounded-xl bg-gray-50 border border-gray-200 text-sm focus:outline-none focus:border-[#0B402B]"
+
+                    >
+
+                </div>
+
+                <button
+
+                    type="submit"
+
+                    class="w-full bg-[#0B402B] hover:bg-[#135A3E] text-white font-semibold py-3 rounded-xl transition">
+
+                    <i class="bi bi-funnel mr-2"></i>
+
+                    Aplicar filtros
+
+                </button>
+
+            </aside>
+
+            <section class="lg:col-span-3 space-y-5">
+
+                {% if coincidencias_destacadas %}
+                <section class="bg-white rounded-2xl border border-[#bce2c7] shadow-sm p-5 space-y-4" aria-labelledby="titulo-coincidencias">
+                    <div>
+                        <h2 id="titulo-coincidencias" class="text-lg font-bold text-[#0B402B] flex items-center gap-2">
+                            <i class="bi bi-stars" aria-hidden="true"></i>
+                            Posibles coincidencias para tus reportes
+                        </h2>
+                        <p class="text-sm text-gray-600 mt-1">
+                            Son sugerencias calculadas a partir de las características publicadas. El porcentaje no verifica la propiedad del objeto.
+                        </p>
+                    </div>
+
+                    <div class="grid grid-cols-1 xl:grid-cols-2 gap-3">
+                        {% for coincidencia in coincidencias_destacadas %}
+                            <article class="border border-gray-200 rounded-xl p-4 flex flex-col gap-3">
+                                <div class="flex items-start justify-between gap-3">
+                                    <div class="min-w-0">
+                                        <p class="text-xs text-gray-500">Tu reporte</p>
+                                        <p class="font-semibold text-gray-800 break-words">{{ coincidencia.mi_reporte.titulo }}</p>
+                                    </div>
+                                    <span class="shrink-0 rounded-full bg-[#E8F8EE] text-[#0B402B] px-3 py-1 text-sm font-bold">
+                                        {{ coincidencia.porcentaje_similitud|floatformat:1 }}%
+                                    </span>
+                                </div>
+
+                                <div class="flex items-center gap-3">
+                                    <div class="w-14 h-14 shrink-0 bg-[#E8F8EE] rounded-lg overflow-hidden flex items-center justify-center">
+                                        {% if coincidencia.objeto_coincidente.foto %}
+                                            <img src="{{ coincidencia.objeto_coincidente.foto.url }}"
+                                                 alt="Fotografía del objeto relacionado"
+                                                 class="w-full h-full object-cover" loading="lazy">
+                                        {% else %}
+                                            <i class="bi bi-image text-[#217351] text-xl" aria-hidden="true"></i>
+                                        {% endif %}
+                                    </div>
+                                    <div class="min-w-0">
+                                        <p class="text-xs text-gray-500">Posible objeto relacionado</p>
+                                        <p class="text-sm font-semibold text-[#0B402B] break-words">{{ coincidencia.objeto_coincidente.titulo }}</p>
+                                        <p class="text-xs text-gray-500">{{ coincidencia.objeto_coincidente.lugar }}</p>
+                                    </div>
+                                </div>
+                                <a href="{% url 'detalle_objeto' coincidencia.objeto_coincidente.id %}"
+                                   class="mt-auto text-center block rounded-xl bg-[#0B402B] hover:bg-[#135A3E] text-white text-sm font-semibold px-4 py-2 transition">
+                                    Ver posible coincidencia
+                                </a>
+                            </article>
+                        {% endfor %}
+                    </div>
+                </section>
+                {% endif %}
+
+
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+
+                    <div>
+
+                        <h2 class="text-xl font-bold text-gray-800">
+
+                            Objetos de la comunidad
+
+                        </h2>
+
+                        <p class="text-sm text-gray-500 mt-1">
+
+                            {{ page_obj.paginator.count }} resultado{{ page_obj.paginator.count|pluralize }} encontrado{{ page_obj.paginator.count|pluralize }}
+
+                        </p>
+
+                    </div>
+
+                    <span class="text-xs text-[#217351] bg-[#E8F8EE] px-3 py-2 rounded-full font-medium self-start">
+
+                        <i class="bi bi-clock-history mr-1"></i>
+
+                        Más recientes primero
+
+                    </span>
+
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+
+                    {% for objeto in page_obj %}
+
+                        <article class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden flex flex-col hover:shadow-md transition">
+
+                            <div class="h-44 bg-[#E8F8EE] relative overflow-hidden">
+
+                                {% if objeto.foto %}
+
+                                    <img
+
+                                        src="{{ objeto.foto.url }}"
+
+                                        alt="Fotografía de {{ objeto.titulo }}"
+
+                                        class="w-full h-full object-cover"
+
+                                        loading="lazy"
+
+                                    >
+
+                                {% else %}
+
+                                    <div class="w-full h-full flex flex-col items-center justify-center gap-2 text-[#217351]">
+
+                                        <i class="bi bi-image text-5xl opacity-50"></i>
+
+                                        <span class="text-xs">
+
+                                            Sin fotografía
+
+                                        </span>
+
+                                    </div>
+
+                                {% endif %}
+
+                                <div class="absolute top-3 left-3">
+
+                                    {% if objeto.estado == 'PERDIDO' %}
+
+                                        <span class="inline-flex items-center gap-1 bg-[#FFF2D6] text-[#92400E] px-3 py-1.5 rounded-full text-xs font-bold shadow-sm">
+
+                                            <i class="bi bi-exclamation-circle-fill"></i>
+
+                                            Perdido
+
+                                        </span>
+
+                                    {% else %}
+
+                                        <span class="inline-flex items-center gap-1 bg-[#D0ECD7] text-[#0B402B] px-3 py-1.5 rounded-full text-xs font-bold shadow-sm">
+
+                                            <i class="bi bi-check-circle-fill"></i>
+
+                                            Encontrado
+
+                                        </span>
+
+                                    {% endif %}
+
+                                </div>
+
+                            </div>
+
+                            <div class="p-5 flex flex-col flex-1 gap-3">
+
+                                <div>
+
+                                    <h3 class="font-bold text-gray-800 text-base line-clamp-2 break-words">
+
+                                        {{ objeto.titulo }}
+
+                                    </h3>
+
+                                    <p class="text-xs text-[#217351] font-semibold mt-2">
+
+                                        <i class="bi bi-tag mr-1"></i>
+
+                                        {{ objeto.categoria|default:"Sin categoría" }}
+
+                                    </p>
+
+                                </div>
+
+                                <p class="text-sm text-gray-600">
+
+                                    <i class="bi bi-geo-alt text-[#217351] mr-1"></i>
+
+                                    {{ objeto.lugar|default:"Lugar no indicado" }}
+
+                                </p>
+
+                                <p class="text-xs text-gray-500">
+
+                                    <i class="bi bi-calendar3 mr-1"></i>
+
+                                    {% if objeto.fecha_suceso %}
+
+                                        {{ objeto.fecha_suceso|date:"d/m/Y" }}
+
+                                    {% else %}
+
+                                        Fecha no indicada
+
+                                    {% endif %}
+
+                                </p>
+
+                                <div class="mt-auto pt-4 border-t border-gray-100">
+
+                                    <a
+
+                                        href="{% url 'detalle_objeto' objeto.id %}"
+
+                                        class="w-full flex items-center justify-center gap-2 bg-[#0B402B] hover:bg-[#135A3E] text-white text-sm font-semibold py-3 rounded-xl transition">
+
+                                        <i class="bi bi-eye"></i>
+
+                                        Ver detalles
+
+                                    </a>
+
+                                </div>
+
+                            </div>
+
+                        </article>
+
+                    {% empty %}
+
+                        <div class="col-span-full bg-white rounded-2xl border border-gray-200 p-10 text-center">
+
+                            <div class="w-20 h-20 bg-[#E8F8EE] rounded-full flex items-center justify-center mx-auto mb-5">
+
+                                <i class="bi bi-search text-4xl text-[#0B402B]"></i>
+
+                            </div>
+
+                            <h3 class="text-lg font-bold text-gray-800">
+
+                                No encontramos objetos
+
+                            </h3>
+
+                            <p class="text-gray-500 text-sm mt-2 max-w-md mx-auto">
+
+                                No hay reportes que coincidan con tu búsqueda.
+
+                                Prueba con otras palabras o cambia los filtros.
+
+                            </p>
+
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+                {% if page_obj.has_other_pages %}
+
+                    <div class="flex items-center justify-center gap-4 pt-5">
+
+                        {% if page_obj.has_previous %}
+
+                            <a
+
+                                href="?q={{ q|urlencode }}&amp;tipo={{ tipo|urlencode }}&amp;categoria={{ categoria|urlencode }}&amp;color={{ color|urlencode }}&amp;marca={{ marca|urlencode }}&amp;lugar={{ lugar|urlencode }}&amp;fecha={{ fecha|urlencode }}&amp;page={{ page_obj.previous_page_number }}"
+
+                                class="px-4 py-2 rounded-xl bg-white border border-gray-200 text-sm font-semibold text-[#0B402B] hover:bg-[#E8F8EE]">
+
+                                <i class="bi bi-chevron-left mr-1"></i>
+
+                                Anterior
+
+                            </a>
+
+                        {% endif %}
+
+                        <span class="text-sm font-medium text-gray-600">
+
+                            Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
+
+                        </span>
+
+                        {% if page_obj.has_next %}
+
+                            <a
+
+                                href="?q={{ q|urlencode }}&amp;tipo={{ tipo|urlencode }}&amp;categoria={{ categoria|urlencode }}&amp;color={{ color|urlencode }}&amp;marca={{ marca|urlencode }}&amp;lugar={{ lugar|urlencode }}&amp;fecha={{ fecha|urlencode }}&amp;page={{ page_obj.next_page_number }}"
+
+                                class="px-4 py-2 rounded-xl bg-white border border-gray-200 text-sm font-semibold text-[#0B402B] hover:bg-[#E8F8EE]">
+
+                                Siguiente
+
+                                <i class="bi bi-chevron-right ml-1"></i>
+
+                            </a>
+
+                        {% endif %}
+
+                    </div>
+
+                {% endif %}
+
+            </section>
+
+        </div>
+
+    </form>
+
+</div>
+
+{% endblock %}

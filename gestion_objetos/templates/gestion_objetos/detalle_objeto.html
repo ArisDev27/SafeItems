@@ -1,0 +1,665 @@
+{% extends 'gestion_objetos/base.html' %}
+
+{% block titulo_documento %}
+Detalles del objeto - SafeItems
+{% endblock %}
+
+{% block titulo_pagina %}
+Detalles del objeto
+{% endblock %}
+
+{% block contenido %}
+
+<div class="p-5 md:p-8 max-w-5xl mx-auto space-y-6">
+
+    {% if request.GET.desde == 'mis_reportes' %}
+        <a href="{% url 'mis_reportes' %}"
+           class="inline-flex items-center gap-2 text-sm text-[#0B402B] font-semibold hover:underline">
+            <i class="bi bi-arrow-left"></i>
+            Volver a mis reportes
+        </a>
+    {% elif request.GET.desde == 'inicio' %}
+        <a href="{% url 'inicio' %}"
+           class="inline-flex items-center gap-2 text-sm text-[#0B402B] font-semibold hover:underline">
+            <i class="bi bi-arrow-left"></i>
+            Volver al inicio
+        </a>
+    {% else %}
+        <a href="{% url 'buscar_objeto' %}"
+           class="inline-flex items-center gap-2 text-sm text-[#0B402B] font-semibold hover:underline">
+            <i class="bi bi-arrow-left"></i>
+            Volver a buscar objetos
+        </a>
+    {% endif %}
+
+    <div>
+        <h1 class="text-2xl md:text-3xl font-bold text-[#0B402B]">
+            Detalles del objeto
+        </h1>
+        <p class="text-gray-500 text-sm mt-2">
+            Consulta las características del objeto reportado.
+        </p>
+    </div>
+
+    <!-- INFORMACIÓN DEL OBJETO -->
+    <section class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+
+        <div class="grid grid-cols-1 md:grid-cols-2">
+
+            <div class="bg-[#E8F8EE] min-h-72 flex items-center justify-center">
+                {% if objeto.foto %}
+                    <button type="button"
+                            id="abrirImagen"
+                            aria-label="Ampliar fotografía del objeto"
+                            class="relative group w-full h-full min-h-72 cursor-zoom-in flex items-center justify-center">
+
+                        <img src="{{ objeto.foto.url }}"
+                             alt="Fotografía de {{ objeto.titulo }}"
+                             class="w-full h-full max-h-[450px] object-contain">
+
+                        <span class="absolute bottom-4 right-4 flex items-center gap-2 bg-black/70 text-white text-xs font-semibold px-4 py-2 rounded-full group-hover:bg-black/90 transition">
+                            <i class="bi bi-arrows-fullscreen"></i>
+                            Ampliar imagen
+                        </span>
+                    </button>
+                {% else %}
+                    <div class="text-[#217351] text-center p-12">
+                        <i class="bi bi-image text-6xl"></i>
+                        <p class="text-sm mt-3">Sin fotografía</p>
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="p-6 md:p-8 space-y-5">
+
+                {% if objeto.estado == 'PERDIDO' %}
+                    <span class="inline-flex items-center gap-2 bg-amber-100 text-amber-800 px-3 py-2 rounded-full text-xs font-bold">
+                        <i class="bi bi-exclamation-circle-fill"></i>
+                        Objeto perdido
+                    </span>
+                {% elif objeto.estado == 'ENCONTRADO' %}
+                    <span class="inline-flex items-center gap-2 bg-green-100 text-green-800 px-3 py-2 rounded-full text-xs font-bold">
+                        <i class="bi bi-check-circle-fill"></i>
+                        Objeto encontrado
+                    </span>
+                {% else %}
+                    <span class="inline-flex items-center gap-2 bg-blue-100 text-blue-800 px-3 py-2 rounded-full text-xs font-bold">
+                        <i class="bi bi-box-seam"></i>
+                        Objeto reclamado
+                    </span>
+                {% endif %}
+
+                <h2 class="text-2xl font-bold text-[#0B402B] break-words">
+                    {{ objeto.titulo }}
+                </h2>
+
+                <div class="space-y-4 text-sm">
+
+                    <div>
+                        <p class="text-gray-500 mb-1">Categoría</p>
+                        <p class="font-semibold text-gray-800">
+                            {{ objeto.categoria|default:"No indicada" }}
+                        </p>
+                    </div>
+
+                    <div>
+                        <p class="text-gray-500 mb-1">Color</p>
+                        <p class="font-semibold text-gray-800">
+                            {{ objeto.color|default:"No indicado" }}
+                        </p>
+                    </div>
+
+                    <div>
+                        <p class="text-gray-500 mb-1">Marca</p>
+                        <p class="font-semibold text-gray-800">
+                            {{ objeto.marca|default:"No indicada" }}
+                        </p>
+                    </div>
+
+                    <div>
+                        <p class="text-gray-500 mb-1">Ubicación</p>
+                        <p class="font-semibold text-gray-800">
+                            {{ objeto.lugar|default:"No indicada" }}
+                        </p>
+                    </div>
+
+                    <div>
+                        <p class="text-gray-500 mb-1">Fecha del suceso</p>
+                        <p class="font-semibold text-gray-800">
+                            {% if objeto.fecha_suceso %}
+                                {{ objeto.fecha_suceso|date:"d/m/Y" }}
+                            {% else %}
+                                No indicada
+                            {% endif %}
+                        </p>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="p-6 md:p-8 border-t border-gray-100">
+            <h3 class="text-lg font-bold text-[#0B402B] mb-3">
+                Descripción del objeto
+            </h3>
+            <p class="text-sm text-gray-600 whitespace-pre-line break-words">{{ objeto.descripcion|default:"No se proporcionó una descripción adicional." }}</p>
+        </div>
+
+        <!-- BOTÓN RECLAMAR OBJETO -->
+        {% if objeto.estado == 'ENCONTRADO' and objeto.reportado_por_id != request.user.id %}
+
+            <div class="px-6 md:px-8 pb-6 md:pb-8">
+                <div class="border-t border-gray-100 pt-6">
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+
+                        <div>
+                            <h3 class="text-base font-bold text-[#0B402B]">
+                                ¿Crees que este objeto es tuyo?
+                            </h3>
+                            <p class="text-sm text-gray-500 mt-1">
+                                Responde una pregunta de seguridad para solicitar su recuperación.
+                            </p>
+                        </div>
+
+                        <a href="{% url 'reclamar_objeto' objeto.id %}"
+                           class="inline-flex items-center justify-center gap-2 bg-[#0B402B] hover:bg-[#135A3E] text-white px-6 py-3 rounded-xl font-semibold text-sm transition shrink-0">
+                            <i class="bi bi-shield-check"></i>
+                            Reclamar objeto
+                        </a>
+
+                    </div>
+                </div>
+            </div>
+
+        {% endif %}
+
+        <!-- BOTÓN LO ENCONTRÉ -->
+        {% if objeto.estado == 'PERDIDO' and objeto.reportado_por_id != request.user.id %}
+
+            <div class="px-6 md:px-8 pb-6 md:pb-8">
+                <div class="border-t border-gray-100 pt-6">
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+
+                        <div>
+                            <h3 class="text-base font-bold text-[#0B402B]">
+                                ¿Encontraste este objeto?
+                            </h3>
+                            <p class="text-sm text-gray-500 mt-1">
+                                Informa al propietario que encontraste
+                                un objeto que podría ser el suyo.
+                            </p>
+                        </div>
+
+                        <a href="{% url 'lo_encontre' objeto.id %}"
+                           class="inline-flex items-center justify-center gap-2 bg-[#0B402B] hover:bg-[#135A3E] text-white px-6 py-3 rounded-xl font-semibold text-sm transition shrink-0">
+                            <i class="bi bi-hand-thumbs-up"></i>
+                            Lo encontré
+                        </a>
+
+                    </div>
+                </div>
+            </div>
+
+        {% endif %}
+
+    </section>
+
+    <!-- NUEVA SECCIÓN: COINCIDENCIAS DEL OBJETO -->
+    {% if objeto.reportado_por_id == request.user.id and objeto.estado != 'RECLAMADO' %}
+
+        <section id="coincidencias-objeto"
+                 class="bg-white rounded-2xl border border-[#bce2c7] shadow-sm p-6 md:p-8 space-y-5 scroll-mt-28">
+
+            <div class="flex items-start gap-3">
+
+                <div class="w-11 h-11 shrink-0 bg-[#E8F8EE] rounded-xl flex items-center justify-center">
+                    <i class="bi bi-stars text-xl text-[#0B402B]"></i>
+                </div>
+
+                <div>
+                    <h3 class="text-lg font-bold text-[#0B402B]">
+                        Posibles coincidencias de tu reporte
+                    </h3>
+                    <p class="text-sm text-gray-500 mt-1">
+                        Comparamos tu publicación con otros objetos de la comunidad.
+                        El porcentaje indica similitud, no confirma quién es el propietario.
+                    </p>
+                </div>
+
+            </div>
+
+            {% if coincidencias_del_objeto %}
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                    {% for coincidencia in coincidencias_del_objeto %}
+
+                        <article class="border border-gray-200 rounded-2xl p-4 space-y-4">
+
+                            <div class="flex items-start justify-between gap-3">
+                                <div>
+                                    <p class="text-xs text-gray-500">
+                                        Posible objeto relacionado
+                                    </p>
+                                    <h4 class="font-bold text-[#0B402B] break-words mt-1">
+                                        {{ coincidencia.relacionado.titulo }}
+                                    </h4>
+                                </div>
+
+                                <span class="shrink-0 bg-[#E8F8EE] text-[#0B402B] text-sm font-bold px-3 py-2 rounded-full">
+                                    {{ coincidencia.porcentaje|floatformat:1 }}%
+                                </span>
+                            </div>
+
+                            <div class="flex items-start gap-3">
+
+                                <div class="w-20 h-20 shrink-0 bg-[#E8F8EE] rounded-xl overflow-hidden flex items-center justify-center">
+
+                                    {% if coincidencia.relacionado.foto %}
+                                        <img src="{{ coincidencia.relacionado.foto.url }}"
+                                             alt="Fotografía de {{ coincidencia.relacionado.titulo }}"
+                                             loading="lazy"
+                                             class="w-full h-full object-cover">
+                                    {% else %}
+                                        <i class="bi bi-image text-2xl text-[#217351]"></i>
+                                    {% endif %}
+
+                                </div>
+
+                                <div class="min-w-0 space-y-2 text-sm text-gray-600">
+
+                                    {% if coincidencia.relacionado.estado == 'PERDIDO' %}
+                                        <span class="inline-block text-xs font-semibold text-amber-700">
+                                            Objeto perdido
+                                        </span>
+                                    {% else %}
+                                        <span class="inline-block text-xs font-semibold text-green-700">
+                                            Objeto encontrado
+                                        </span>
+                                    {% endif %}
+
+                                    <p class="break-words">
+                                        <i class="bi bi-tag text-[#217351] mr-1"></i>
+                                        {{ coincidencia.relacionado.categoria }}
+                                    </p>
+
+                                    <p class="break-words">
+                                        <i class="bi bi-geo-alt text-[#217351] mr-1"></i>
+                                        {{ coincidencia.relacionado.lugar }}
+                                    </p>
+
+                                </div>
+                            </div>
+
+                            <a href="{% url 'detalle_objeto' coincidencia.relacionado.id %}"
+                               class="flex items-center justify-center gap-2 rounded-xl bg-[#0B402B] hover:bg-[#135A3E] text-white text-sm font-semibold py-3 px-4 transition">
+                                <i class="bi bi-eye"></i>
+                                Ver posible coincidencia
+                            </a>
+
+                        </article>
+
+                    {% endfor %}
+
+                </div>
+
+            {% else %}
+
+                <div class="bg-gray-50 rounded-xl p-6 text-center">
+                    <i class="bi bi-search text-3xl text-gray-400"></i>
+                    <p class="text-sm text-gray-500 mt-2">
+                        Todavía no encontramos coincidencias para este reporte.
+                    </p>
+                </div>
+
+            {% endif %}
+
+        </section>
+
+    {% endif %}
+
+    <!-- AVISOS DE HALLAZGO RECIBIDOS -->
+    {% if objeto.estado == 'PERDIDO' and objeto.reportado_por_id == request.user.id %}
+
+        <section id="avisos-recibidos"
+                 class="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 md:p-8 space-y-5 scroll-mt-28">
+
+            <div class="flex items-center gap-3">
+
+                <div class="w-11 h-11 bg-[#E8F8EE] rounded-xl flex items-center justify-center">
+                    <i class="bi bi-bell-fill text-xl text-[#0B402B]"></i>
+                </div>
+
+                <div>
+                    <h3 class="text-lg font-bold text-[#0B402B]">
+                        Avisos de hallazgo recibidos
+                    </h3>
+                    <p class="text-sm text-gray-500">
+                        Estudiantes que informaron que encontraron tu objeto.
+                    </p>
+                </div>
+
+            </div>
+
+            {% for aviso in avisos_recibidos %}
+
+                <article id="aviso-{{ aviso.id }}"
+                         class="border border-gray-200 rounded-2xl overflow-hidden scroll-mt-28 target:ring-2 target:ring-green-600">
+
+                    <div class="bg-[#E8F8EE] px-5 py-4 flex items-center justify-between gap-3">
+
+                        <div class="flex items-center gap-2">
+                            <i class="bi bi-person-circle text-[#0B402B] text-xl"></i>
+                            <span class="font-semibold text-[#0B402B] text-sm">
+                                {{ aviso.informante.first_name|default:aviso.informante.username }}
+                            </span>
+                        </div>
+
+                        <span class="bg-white text-[#0B402B] text-xs font-semibold px-3 py-1 rounded-full">
+                            {{ aviso.get_estado_display }}
+                        </span>
+
+                    </div>
+
+                    <div class="p-5 space-y-4">
+
+                        <div>
+                            <p class="text-xs text-gray-500 mb-1">
+                                Lugar donde encontró el objeto
+                            </p>
+                            <p class="text-sm font-semibold text-gray-800">
+                                {{ aviso.lugar_hallazgo }}
+                            </p>
+                        </div>
+
+                        <div>
+                            <p class="text-xs text-gray-500 mb-1">
+                                Descripción enviada
+                            </p>
+                            <p class="text-sm text-gray-700 whitespace-pre-line break-words">{{ aviso.descripcion }}</p>
+                        </div>
+
+                        {% if aviso.foto %}
+                            <div>
+                                <p class="text-xs text-gray-500 mb-2">
+                                    Fotografía enviada por el estudiante
+                                </p>
+                                <img src="{{ aviso.foto.url }}"
+                                     alt="Fotografía del objeto encontrado"
+                                     class="w-full max-w-sm max-h-80 object-contain rounded-xl border border-gray-200 bg-gray-50">
+                            </div>
+                        {% endif %}
+
+                        <p class="text-xs text-gray-400">
+                            <i class="bi bi-clock mr-1"></i>
+                            Enviado el {{ aviso.fecha_aviso|date:"d/m/Y H:i" }}
+                        </p>
+
+                        <!-- DESCARTAR AVISO DE HALLAZGO -->
+                        {% if aviso.estado == 'PENDIENTE' %}
+
+                            <div class="border-t border-gray-100 pt-4">
+
+                                <form method="post"
+                                    action="{% url 'descartar_aviso_hallazgo' aviso.id %}"
+                                    onsubmit="return confirm('¿Estás seguro de que este aviso no corresponde a tu objeto?');">
+
+                                    {% csrf_token %}
+
+                                    <button type="submit"
+                                            class="inline-flex items-center justify-center gap-2
+                                                rounded-xl bg-red-50 hover:bg-red-100
+                                                border border-red-200 text-red-700
+                                                px-5 py-3 text-sm font-semibold transition">
+
+                                        <i class="bi bi-x-circle"></i>
+                                        Descartar aviso
+
+                                    </button>
+
+                                </form>
+
+                                <p class="text-xs text-gray-500 mt-2">
+                                    Descarta este aviso si el objeto informado no es el tuyo.
+                                </p>
+
+                            </div>
+
+                        {% elif aviso.estado == 'RECHAZADO' %}
+
+                            <div class="rounded-xl bg-gray-50 border border-gray-200
+                                        px-4 py-3 text-sm text-gray-600">
+
+                                <i class="bi bi-check-circle mr-1"></i>
+                                Este aviso fue descartado.
+
+                            </div>
+
+                        {% endif %}
+
+                    </div>
+
+                </article>
+
+            {% empty %}
+
+                <div class="bg-gray-50 rounded-xl p-6 text-center">
+                    <i class="bi bi-inbox text-3xl text-gray-400"></i>
+                    <p class="text-sm text-gray-500 mt-2">
+                        Todavía no has recibido avisos sobre este objeto.
+                    </p>
+                </div>
+
+            {% endfor %}
+
+        </section>
+
+    {% endif %}
+
+    <!-- SOLICITUDES DE RECLAMACIÓN RECIBIDAS -->
+    {% if objeto.reportado_por_id == request.user.id %}
+        {% if objeto.estado == 'ENCONTRADO' or objeto.estado == 'RECLAMADO' %}
+
+            <section id="reclamaciones-recibidas"
+                     class="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 md:p-8 space-y-5 scroll-mt-28">
+
+                <div class="flex items-center gap-3">
+
+                    <div class="w-11 h-11 bg-[#E8F8EE] rounded-xl flex items-center justify-center">
+                        <i class="bi bi-shield-check text-xl text-[#0B402B]"></i>
+                    </div>
+
+                    <div>
+                        <h3 class="text-lg font-bold text-[#0B402B]">
+                            Solicitudes de reclamación recibidas
+                        </h3>
+                        <p class="text-sm text-gray-500">
+                            Estudiantes que solicitaron recuperar el objeto que publicaste.
+                        </p>
+                    </div>
+
+                </div>
+
+                {% for solicitud in solicitudes_recibidas %}
+
+                    <article id="reclamacion-{{ solicitud.id }}"
+                             class="border border-gray-200 rounded-2xl overflow-hidden scroll-mt-28 target:ring-2 target:ring-green-600">
+
+                        <div class="bg-[#E8F8EE] px-5 py-4 flex flex-wrap items-center justify-between gap-3">
+
+                            <div class="flex items-center gap-2 min-w-0">
+                                <i class="bi bi-person-circle text-[#0B402B] text-xl"></i>
+                                <span class="font-semibold text-[#0B402B] text-sm break-words">
+                                    {{ solicitud.solicitante.get_full_name|default:solicitud.solicitante.username }}
+                                </span>
+                            </div>
+
+                            {% if solicitud.estado == 'PENDIENTE' %}
+                                <span class="bg-amber-100 text-amber-800 text-xs font-semibold px-3 py-1 rounded-full">
+                                    Pendiente
+                                </span>
+                            {% elif solicitud.estado == 'APROBADA' %}
+                                <span class="bg-green-100 text-green-800 text-xs font-semibold px-3 py-1 rounded-full">
+                                    Aprobada
+                                </span>
+                            {% elif solicitud.estado == 'RECHAZADA' %}
+                                <span class="bg-red-100 text-red-800 text-xs font-semibold px-3 py-1 rounded-full">
+                                    Rechazada
+                                </span>
+                            {% elif solicitud.estado == 'ENTREGADA' %}
+                                <span class="bg-blue-100 text-blue-800 text-xs font-semibold px-3 py-1 rounded-full">
+                                    Entregada
+                                </span>
+                            {% endif %}
+
+                        </div>
+
+                        <div class="p-5 space-y-4">
+
+                            <div>
+                                <p class="text-xs text-gray-500 mb-1">
+                                    Solicitud enviada
+                                </p>
+                                <p class="text-sm font-semibold text-gray-800">
+                                    {{ solicitud.fecha_solicitud|date:"d/m/Y H:i" }}
+                                </p>
+                            </div>
+
+                            <div class="p-5 space-y-4">
+
+                                <div>
+                                    <p class="text-xs text-gray-500 mb-1">
+                                        Solicitud enviada
+                                    </p>
+                                    <p class="text-sm font-semibold text-gray-800">
+                                        {{ solicitud.fecha_solicitud|date:"d/m/Y H:i" }}
+                                    </p>
+                                </div>
+
+                                <!-- NUEVO: FECHA DE REVISIÓN -->
+                                {% if solicitud.fecha_revision %}
+
+                                    <div>
+                                        <p class="text-xs text-gray-500 mb-1">
+                                            Revisión del administrador
+                                        </p>
+
+                                        <p class="text-sm font-semibold text-gray-800">
+                                            {{ solicitud.fecha_revision|date:"d/m/Y H:i" }}
+                                            · {{ solicitud.get_estado_display }}
+                                        </p>
+                                    </div>
+
+                                {% endif %}
+
+                                <!-- NUEVO: FECHA DE ENTREGA -->
+                                {% if solicitud.fecha_entrega %}
+
+                                    <div>
+                                        <p class="text-xs text-gray-500 mb-1">
+                                            Entrega confirmada
+                                        </p>
+
+                                        <p class="text-sm font-semibold text-green-800">
+                                            {{ solicitud.fecha_entrega|date:"d/m/Y H:i" }}
+                                        </p>
+                                    </div>
+
+                                {% endif %}
+
+                            {% if solicitud.respuesta_verificada %}
+                                <div class="flex items-start gap-2 bg-[#F0FAF3] border border-[#D0ECD7] rounded-xl px-4 py-3">
+                                    <i class="bi bi-shield-check text-[#0B402B] mt-0.5"></i>
+                                    <p class="text-sm text-[#0B402B]">
+                                        El estudiante respondió correctamente la pregunta de seguridad.
+                                    </p>
+                                </div>
+                            {% endif %}
+
+                            {% if solicitud.estado == 'PENDIENTE' %}
+                                <p class="text-sm text-gray-600">
+                                    Esta solicitud está pendiente de revisión por el administrador.
+                                    No necesitas aprobarla ni rechazarla desde aquí.
+                                </p>
+                            {% elif solicitud.estado == 'APROBADA' %}
+                                <p class="text-sm text-gray-600">
+                                    El administrador aprobó esta reclamación. La entrega del objeto todavía debe confirmarse.
+                                </p>
+                            {% elif solicitud.estado == 'RECHAZADA' %}
+                                <p class="text-sm text-gray-600">
+                                    El administrador rechazó esta reclamación.
+                                </p>
+                            {% elif solicitud.estado == 'ENTREGADA' %}
+                                <p class="text-sm text-gray-600">
+                                    La entrega física de este objeto ya fue registrada.
+                                </p>
+                            {% endif %}
+
+                        </div>
+
+                    </article>
+
+                {% empty %}
+
+                    <div class="bg-gray-50 rounded-xl p-6 text-center">
+                        <i class="bi bi-inbox text-3xl text-gray-400"></i>
+                        <p class="text-sm text-gray-500 mt-2">
+                            Todavía no has recibido solicitudes de reclamación para este objeto.
+                        </p>
+                    </div>
+
+                {% endfor %}
+
+            </section>
+
+        {% endif %}
+    {% endif %}
+
+</div>
+
+<!-- MODAL PARA AMPLIAR LA FOTO -->
+{% if objeto.foto %}
+
+    <dialog id="modalImagen"
+            aria-label="Fotografía ampliada de {{ objeto.titulo }}"
+            class="w-[95vw] max-w-5xl max-h-[95vh] p-0 bg-transparent border-0 rounded-xl backdrop:bg-black/85">
+
+        <div class="relative flex items-center justify-center">
+
+            <button type="button"
+                    id="cerrarImagen"
+                    aria-label="Cerrar fotografía ampliada"
+                    class="absolute top-3 right-3 z-10 w-10 h-10 rounded-full bg-black/70 text-white flex items-center justify-center hover:bg-black transition">
+                <i class="bi bi-x-lg text-lg"></i>
+            </button>
+
+            <img src="{{ objeto.foto.url }}"
+                 alt="Fotografía ampliada de {{ objeto.titulo }}"
+                 class="max-w-full max-h-[90vh] object-contain rounded-xl">
+
+        </div>
+    </dialog>
+
+    <script>
+        const abrirImagen = document.getElementById('abrirImagen');
+        const modalImagen = document.getElementById('modalImagen');
+        const cerrarImagen = document.getElementById('cerrarImagen');
+
+        abrirImagen.addEventListener('click', function () {
+            modalImagen.showModal();
+        });
+
+        cerrarImagen.addEventListener('click', function () {
+            modalImagen.close();
+        });
+
+        modalImagen.addEventListener('click', function (event) {
+            if (event.target === modalImagen) {
+                modalImagen.close();
+            }
+        });
+    </script>
+
+{% endif %}
+
+{% endblock %}

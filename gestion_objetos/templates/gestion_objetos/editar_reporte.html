@@ -1,0 +1,586 @@
+
+{% extends 'gestion_objetos/base.html' %}
+
+{% block titulo_documento %}
+Editar reporte - SafeItems
+{% endblock %}
+
+{% block titulo_pagina %}
+Editar reporte
+{% endblock %}
+
+{% block contenido %}
+
+<div class="p-5 md:p-8 max-w-4xl mx-auto space-y-6">
+
+    <a href="{% url 'mis_reportes' %}"
+       class="inline-flex items-center gap-2 text-sm font-semibold text-[#0B402B] hover:underline">
+
+        <i class="bi bi-arrow-left"></i>
+        Volver a mis reportes
+
+    </a>
+
+    <div>
+        <h1 class="text-2xl md:text-3xl font-bold text-[#0B402B]">
+            Editar reporte
+        </h1>
+
+        <p class="text-gray-500 text-sm mt-2">
+            Actualiza la información del objeto que publicaste.
+        </p>
+    </div>
+
+    <section class="bg-white rounded-3xl border border-gray-200 shadow-sm overflow-hidden">
+
+        <!-- ENCABEZADO VERDE -->
+        <div class="bg-gradient-to-r from-[#D0ECD7] to-[#E8F8EE] px-6 py-6 border-b border-[#bce2c7]">
+
+            <div class="flex items-center gap-3">
+
+                <div class="w-12 h-12 bg-white/70 rounded-xl flex items-center justify-center">
+
+                    <i class="bi bi-pencil-square text-2xl text-[#0B402B]"></i>
+
+                </div>
+
+                <div class="flex-1">
+
+                    <div class="flex flex-wrap items-center gap-3">
+
+                        <h2 class="text-lg font-bold text-[#0B402B]">
+                            Información del reporte
+                        </h2>
+
+                        {% if objeto.estado == 'PERDIDO' %}
+
+                            <span class="bg-amber-100 text-amber-800 text-xs font-bold px-3 py-1 rounded-full">
+                                Perdido
+                            </span>
+
+                        {% elif objeto.estado == 'ENCONTRADO' %}
+
+                            <span class="bg-green-100 text-green-800 text-xs font-bold px-3 py-1 rounded-full">
+                                Encontrado
+                            </span>
+
+                        {% endif %}
+
+                    </div>
+
+                    <p class="text-sm text-[#217351] mt-1">
+                        Modifica únicamente los datos que necesites corregir.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- FORMULARIO -->
+        <form
+            method="post"
+            enctype="multipart/form-data"
+            class="p-6 md:p-8 space-y-7">
+
+            {% csrf_token %}
+
+            <input
+                type="hidden"
+                name="quitar_foto"
+                id="quitarFotoGuardada"
+                value="0"
+            >
+
+            {% if form.non_field_errors %}
+
+                <div class="bg-red-50 border border-red-200 rounded-xl p-4 text-red-700 text-sm">
+                    {{ form.non_field_errors }}
+                </div>
+
+            {% endif %}
+
+            <!-- INFORMACIÓN DEL OBJETO -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+
+                <div class="md:col-span-2 flex flex-col gap-2">
+
+                    <label for="{{ form.titulo.id_for_label }}"
+                           class="font-semibold text-gray-700 text-sm">
+                        Nombre del objeto
+                    </label>
+
+                    {{ form.titulo }}
+
+                    {% for error in form.titulo.errors %}
+                        <p class="text-red-600 text-xs font-medium">{{ error }}</p>
+                    {% endfor %}
+
+                </div>
+
+                <div class="flex flex-col gap-2">
+
+                    <label for="{{ form.categoria.id_for_label }}"
+                           class="font-semibold text-gray-700 text-sm">
+                        Categoría
+                    </label>
+
+                    {{ form.categoria }}
+
+                    {% for error in form.categoria.errors %}
+                        <p class="text-red-600 text-xs font-medium">{{ error }}</p>
+                    {% endfor %}
+
+                </div>
+
+                <div class="flex flex-col gap-2">
+
+                    <label for="{{ form.color.id_for_label }}"
+                           class="font-semibold text-gray-700 text-sm">
+                        Color
+                    </label>
+
+                    {{ form.color }}
+
+                    {% for error in form.color.errors %}
+                        <p class="text-red-600 text-xs font-medium">{{ error }}</p>
+                    {% endfor %}
+
+                </div>
+
+                <div class="flex flex-col gap-2">
+
+                    <label for="{{ form.marca.id_for_label }}"
+                           class="font-semibold text-gray-700 text-sm">
+                        Marca
+                    </label>
+
+                    {{ form.marca }}
+
+                    {% for error in form.marca.errors %}
+                        <p class="text-red-600 text-xs font-medium">{{ error }}</p>
+                    {% endfor %}
+
+                </div>
+
+                <div class="flex flex-col gap-2">
+
+                    <label for="{{ form.fecha_suceso.id_for_label }}"
+                           class="font-semibold text-gray-700 text-sm">
+                        Fecha del suceso
+                    </label>
+
+                    {{ form.fecha_suceso }}
+
+                    {% for error in form.fecha_suceso.errors %}
+                        <p class="text-red-600 text-xs font-medium">{{ error }}</p>
+                    {% endfor %}
+
+                </div>
+
+                <div class="md:col-span-2 flex flex-col gap-2">
+
+                    <label for="{{ form.lugar.id_for_label }}"
+                           class="font-semibold text-gray-700 text-sm">
+                        Lugar
+                    </label>
+
+                    {{ form.lugar }}
+
+                    <p class="text-xs text-gray-500">
+                        Ejemplo: Biblioteca, segundo piso, cafetería principal.
+                    </p>
+
+                    {% for error in form.lugar.errors %}
+                        <p class="text-red-600 text-xs font-medium">{{ error }}</p>
+                    {% endfor %}
+
+                </div>
+
+                <div class="md:col-span-2 flex flex-col gap-2">
+
+                    <label for="{{ form.descripcion.id_for_label }}"
+                           class="font-semibold text-gray-700 text-sm">
+                        Descripción
+                    </label>
+
+                    {{ form.descripcion }}
+
+                    <p class="text-xs text-gray-500">
+                        Describe las características del objeto y cualquier detalle importante.
+                    </p>
+
+                    {% for error in form.descripcion.errors %}
+                        <p class="text-red-600 text-xs font-medium">{{ error }}</p>
+                    {% endfor %}
+
+                </div>
+
+            </div>
+
+            <!-- FOTOGRAFÍA -->
+            <div class="border-t border-gray-100 pt-6 space-y-4">
+
+                <div class="flex items-center gap-3">
+
+                    <div class="w-10 h-10 rounded-xl bg-[#E8F8EE] flex items-center justify-center">
+                        <i class="bi bi-image text-xl text-[#0B402B]"></i>
+                    </div>
+
+                    <div>
+                        <h3 class="text-base font-bold text-[#0B402B]">
+                            Fotografía del objeto
+                        </h3>
+
+                        <p class="text-xs text-gray-500 mt-1">
+                            Conserva la fotografía o selecciona una nueva.
+                        </p>
+                    </div>
+
+                </div>
+
+                <div class="flex flex-col gap-2">
+
+                    <label
+                        for="{{ form.foto.id_for_label }}"
+                        class="font-semibold text-gray-700 text-sm">
+                        Seleccionar fotografía
+                    </label>
+
+                    <input
+                        type="file"
+                        name="{{ form.foto.html_name }}"
+                        id="{{ form.foto.id_for_label }}"
+                        accept="image/jpeg,image/png,image/webp"
+                        data-estado-objeto="{{ objeto.estado }}"
+                        class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-sm text-gray-700"
+                    >
+
+                    <p class="text-xs text-gray-500">
+                        Formatos permitidos: JPG, PNG o WEBP. Máximo 5 MB.
+                    </p>
+
+                </div>
+
+                <!-- VISTA PREVIA -->
+                <div id="contenedorFotoReporte"
+                     class="{% if not objeto.foto %}hidden{% endif %} mt-3">
+
+                    <div class="flex items-center justify-between gap-3 mb-3">
+
+                        <p class="text-sm font-semibold text-gray-600">
+                            Vista previa
+                        </p>
+
+                        <button
+                            type="button"
+                            id="botonQuitarFotoReporte"
+                            class="flex items-center gap-2 text-sm font-semibold text-red-600 hover:text-red-800 transition">
+
+                            <i class="bi bi-trash"></i>
+
+                            <span id="textoQuitarFotoReporte">
+                                Quitar imagen
+                            </span>
+
+                        </button>
+
+                    </div>
+
+                    <img
+                        id="previewFotoReporte"
+                        {% if objeto.foto %}
+                            src="{{ objeto.foto.url }}"
+                            data-foto-guardada="{{ objeto.foto.url }}"
+                        {% else %}
+                            data-foto-guardada=""
+                        {% endif %}
+                        alt="Fotografía del objeto"
+                        class="w-full max-h-56 object-contain rounded-xl border border-gray-200 bg-gray-50"
+                    >
+
+                </div>
+
+                <!-- MENSAJE SI NO HAY FOTO -->
+                <div id="sinFotoReporte"
+                     class="{% if objeto.foto %}hidden{% endif %}">
+
+                    <p class="text-sm text-gray-500">
+                        <i class="bi bi-image mr-1"></i>
+                        Sin fotografía seleccionada.
+                    </p>
+
+                </div>
+
+                <!-- RESTAURAR IMAGEN ORIGINAL -->
+                <button
+                    type="button"
+                    id="botonRestaurarFoto"
+                    class="hidden items-center gap-2 text-sm font-semibold text-[#0B402B] hover:underline">
+
+                    <i class="bi bi-arrow-counterclockwise"></i>
+                    Recuperar fotografía anterior
+
+                </button>
+
+                <!-- ERRORES -->
+                <p
+                    id="errorFotoReporte"
+                    role="alert"
+                    class="hidden text-red-600 text-xs font-medium">
+                </p>
+
+                {% for error in form.foto.errors %}
+
+                    <p class="text-red-600 text-xs font-medium">
+                        {{ error }}
+                    </p>
+
+                {% endfor %}
+
+                {% if objeto.estado == 'ENCONTRADO' %}
+
+                    <p class="text-xs text-[#0B402B] bg-[#E8F8EE] rounded-xl p-3">
+                        <i class="bi bi-info-circle mr-1"></i>
+                        Los reportes de objetos encontrados deben conservar
+                        una fotografía. Puedes reemplazarla por otra.
+                    </p>
+
+                {% endif %}
+
+            </div>
+
+            <!-- BOTONES -->
+            <div class="flex flex-col-reverse sm:flex-row justify-end gap-3 pt-4 border-t border-gray-100">
+
+                <a
+                    href="{% url 'mis_reportes' %}"
+                    class="px-6 py-3 text-center border border-gray-300 rounded-xl font-semibold text-gray-600 hover:bg-gray-100 transition">
+
+                    Cancelar
+
+                </a>
+
+                <button
+                    type="submit"
+                    class="bg-[#0B402B] text-white px-8 py-3 rounded-xl font-semibold hover:bg-[#135A3E] transition">
+
+                    <i class="bi bi-check-lg mr-2"></i>
+                    Guardar cambios
+
+                </button>
+
+            </div>
+
+        </form>
+
+    </section>
+
+</div>
+
+<script>
+
+    const inputFotoReporte = document.querySelector('input[name="foto"]');
+    const previewFotoReporte = document.getElementById('previewFotoReporte');
+    const contenedorFotoReporte = document.getElementById('contenedorFotoReporte');
+    const sinFotoReporte = document.getElementById('sinFotoReporte');
+    const botonQuitarFotoReporte = document.getElementById('botonQuitarFotoReporte');
+    const textoQuitarFotoReporte = document.getElementById('textoQuitarFotoReporte');
+    const quitarFotoGuardada = document.getElementById('quitarFotoGuardada');
+    const errorFotoReporte = document.getElementById('errorFotoReporte');
+    const botonRestaurarFoto = document.getElementById('botonRestaurarFoto');
+
+    if (
+        inputFotoReporte &&
+        previewFotoReporte &&
+        contenedorFotoReporte &&
+        sinFotoReporte &&
+        botonQuitarFotoReporte &&
+        quitarFotoGuardada
+    ) {
+
+        const fotoOriginal = previewFotoReporte.dataset.fotoGuardada || '';
+        const esEncontrado = inputFotoReporte.dataset.estadoObjeto === 'ENCONTRADO';
+
+        let urlTemporalReporte = null;
+        let eliminarFotoOriginal = false;
+
+        function limpiarTemporal() {
+
+            if (urlTemporalReporte) {
+                URL.revokeObjectURL(urlTemporalReporte);
+                urlTemporalReporte = null;
+            }
+
+        }
+
+        function mostrarEstadoFoto() {
+
+            if (urlTemporalReporte) {
+
+                previewFotoReporte.src = urlTemporalReporte;
+
+                contenedorFotoReporte.classList.remove('hidden');
+                sinFotoReporte.classList.add('hidden');
+
+                textoQuitarFotoReporte.textContent = 'Quitar selección';
+
+                quitarFotoGuardada.value = '0';
+
+            } else if (fotoOriginal && !eliminarFotoOriginal) {
+
+                previewFotoReporte.src = fotoOriginal;
+
+                contenedorFotoReporte.classList.remove('hidden');
+                sinFotoReporte.classList.add('hidden');
+
+                textoQuitarFotoReporte.textContent = 'Quitar imagen';
+
+                quitarFotoGuardada.value = '0';
+
+            } else {
+
+                previewFotoReporte.removeAttribute('src');
+
+                contenedorFotoReporte.classList.add('hidden');
+                sinFotoReporte.classList.remove('hidden');
+
+                quitarFotoGuardada.value = eliminarFotoOriginal ? '1' : '0';
+
+            }
+
+            if (botonRestaurarFoto) {
+
+                if (fotoOriginal && eliminarFotoOriginal && !urlTemporalReporte) {
+                    botonRestaurarFoto.classList.remove('hidden');
+                    botonRestaurarFoto.classList.add('inline-flex');
+                } else {
+                    botonRestaurarFoto.classList.add('hidden');
+                    botonRestaurarFoto.classList.remove('inline-flex');
+                }
+
+            }
+
+            inputFotoReporte.required = esEncontrado &&
+                !urlTemporalReporte &&
+                (!fotoOriginal || eliminarFotoOriginal);
+
+        }
+
+        function mostrarErrorFoto(mensaje) {
+
+            if (errorFotoReporte) {
+                errorFotoReporte.textContent = mensaje;
+                errorFotoReporte.classList.remove('hidden');
+            }
+
+        }
+
+        function ocultarErrorFoto() {
+
+            if (errorFotoReporte) {
+                errorFotoReporte.textContent = '';
+                errorFotoReporte.classList.add('hidden');
+            }
+
+        }
+
+        inputFotoReporte.addEventListener('change', function () {
+
+            limpiarTemporal();
+            ocultarErrorFoto();
+
+            const archivo = this.files[0];
+
+            if (!archivo) {
+                mostrarEstadoFoto();
+                return;
+            }
+
+            const formatos = [
+                'image/jpeg',
+                'image/png',
+                'image/webp'
+            ];
+
+            if (!formatos.includes(archivo.type)) {
+
+                this.value = '';
+
+                mostrarErrorFoto(
+                    'Solo puedes seleccionar imágenes JPG, PNG o WEBP.'
+                );
+
+                mostrarEstadoFoto();
+                return;
+
+            }
+
+            if (archivo.size > 5 * 1024 * 1024) {
+
+                this.value = '';
+
+                mostrarErrorFoto(
+                    'La fotografía no puede superar 5 MB.'
+                );
+
+                mostrarEstadoFoto();
+                return;
+
+            }
+
+            urlTemporalReporte = URL.createObjectURL(archivo);
+
+            eliminarFotoOriginal = false;
+
+            mostrarEstadoFoto();
+
+        });
+
+        botonQuitarFotoReporte.addEventListener('click', function () {
+
+            ocultarErrorFoto();
+
+            if (urlTemporalReporte) {
+
+                limpiarTemporal();
+                inputFotoReporte.value = '';
+
+            } else if (fotoOriginal && !eliminarFotoOriginal) {
+
+                eliminarFotoOriginal = true;
+
+            }
+
+            mostrarEstadoFoto();
+
+        });
+
+        if (botonRestaurarFoto) {
+
+            botonRestaurarFoto.addEventListener('click', function () {
+
+                limpiarTemporal();
+
+                inputFotoReporte.value = '';
+                eliminarFotoOriginal = false;
+
+                ocultarErrorFoto();
+                mostrarEstadoFoto();
+
+            });
+
+        }
+
+        window.addEventListener('pagehide', function () {
+            limpiarTemporal();
+        });
+
+        mostrarEstadoFoto();
+
+    }
+
+</script>
+
+{% endblock %}

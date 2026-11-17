@@ -1,59 +1,572 @@
-{% load static %}
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reportar Objeto Perdido - SafeItems</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-</head>
-<body class="bg-[#f3f4f6] font-sans flex h-screen overflow-hidden items-center justify-center">
 
-    <div class="bg-white p-8 rounded-3xl shadow-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-gray-100">
-        
-        <!-- Encabezado -->
-        <div class="flex items-center gap-4 mb-6 pb-4 border-b border-gray-100">
-            <a href="{% url 'inicio' %}" class="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-gray-500 hover:bg-gray-200 transition">
-                <i class="bi bi-arrow-left text-xl"></i>
-            </a>
-            <div>
-                <h2 class="text-2xl font-extrabold text-[#0B402B]">Reportar objeto perdido</h2>
-                <p class="text-sm text-gray-500">Completa los datos para que la comunidad te ayude a encontrarlo.</p>
+{% extends 'gestion_objetos/base.html' %}
+
+{% block titulo_documento %}
+Reportar objeto - SafeItems
+{% endblock %}
+
+{% block titulo_pagina %}
+Reportar objeto
+{% endblock %}
+
+{% block contenido %}
+
+<div class="p-5 md:p-8 max-w-4xl w-full mx-auto space-y-6">
+
+    <div>
+
+        <h1 class="text-2xl md:text-3xl font-bold text-[#0B402B]">
+            Registrar un objeto
+        </h1>
+
+        <p class="text-gray-500 text-sm mt-2">
+            Completa la información para reportar un objeto perdido o encontrado.
+        </p>
+
+    </div>
+
+    {% if messages %}
+
+        {% for message in messages %}
+
+            <div class="p-4 rounded-xl border text-sm
+                {% if message.tags == 'error' %}
+                    bg-red-50 border-red-200 text-red-700
+                {% else %}
+                    bg-green-50 border-green-200 text-green-800
+                {% endif %}">
+
+                {% if message.tags == 'error' %}
+                    <i class="bi bi-exclamation-circle-fill mr-2"></i>
+                {% else %}
+                    <i class="bi bi-check-circle-fill mr-2"></i>
+                {% endif %}
+
+                {{ message }}
+
             </div>
+
+        {% endfor %}
+
+    {% endif %}
+
+    <section class="bg-white rounded-3xl shadow-sm border border-gray-200 overflow-hidden">
+
+        <div class="bg-gradient-to-r from-[#D0ECD7] to-[#E8F8EE] px-6 py-6 border-b border-[#bce2c7]">
+
+            <div class="flex items-center gap-3">
+
+                <div class="w-12 h-12 bg-white/70 rounded-xl flex items-center justify-center">
+
+                    <i class="bi bi-clipboard-plus text-2xl text-[#0B402B]"></i>
+
+                </div>
+
+                <div>
+
+                    <h2 class="text-lg font-bold text-[#0B402B]">
+                        Información del reporte
+                    </h2>
+
+                    <p class="text-sm text-[#217351] mt-1">
+                        Describe las características del objeto.
+                    </p>
+
+                </div>
+
+            </div>
+
         </div>
 
-<!-- Formulario -->
-        <!-- El enctype es OBLIGATORIO para poder subir la foto del objeto -->
-        <form method="POST" enctype="multipart/form-data" class="space-y-5">
+        <form
+            method="post"
+            enctype="multipart/form-data"
+            class="p-6 md:p-8 space-y-7">
+
             {% csrf_token %}
-            
-            <!-- Formulario Organizado en Grid -->
-            <div class="bg-gray-50 p-6 rounded-2xl border border-gray-200 shadow-inner">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <!-- Recorremos los campos dinámicamente -->
-                    {% for field in form %}
-                        <div class="flex flex-col space-y-1.5 {% if field.name == 'foto' or field.name == 'pregunta_seguridad' or field.name == 'respuesta_seguridad' %}md:col-span-2{% endif %}">
-                            <label for="{{ field.id_for_label }}" class="font-bold text-gray-700 text-sm ml-1">
-                                {{ field.label }}
-                            </label>
-                            {{ field }}
-                            <!-- Muestra errores en rojo si el usuario llena algo mal -->
-                            {% if field.errors %}
-                                <p class="text-red-500 text-xs font-semibold ml-1">{{ field.errors.0 }}</p>
-                            {% endif %}
-                        </div>
-                    {% endfor %}
+
+            {% if form.non_field_errors %}
+
+                <div class="bg-red-50 border border-red-200 rounded-xl p-4 text-red-700 text-sm">
+                    {{ form.non_field_errors }}
                 </div>
+
+            {% endif %}
+
+            <section class="bg-[#E8F8EE] p-5 rounded-2xl border border-[#bce2c7]">
+
+                <h2 class="font-bold text-[#0B402B] mb-3">
+                    ¿Qué deseas reportar?
+                </h2>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+
+                    <label class="flex items-center gap-3 bg-white rounded-xl border border-gray-200 p-4 cursor-pointer hover:border-[#0B402B] transition">
+
+                        <input
+                            type="radio"
+                            name="tipo_reporte"
+                            value="PERDIDO"
+                            class="accent-green-800 w-4 h-4"
+                            {% if tipo_reporte != 'ENCONTRADO' %}checked{% endif %}
+                        >
+
+                        <span class="font-semibold text-gray-700">
+                            <i class="bi bi-exclamation-circle text-amber-600 mr-1"></i>
+                            Objeto perdido
+                        </span>
+
+                    </label>
+
+                    <label class="flex items-center gap-3 bg-white rounded-xl border border-gray-200 p-4 cursor-pointer hover:border-[#0B402B] transition">
+
+                        <input
+                            type="radio"
+                            name="tipo_reporte"
+                            value="ENCONTRADO"
+                            class="accent-green-800 w-4 h-4"
+                            {% if tipo_reporte == 'ENCONTRADO' %}checked{% endif %}
+                        >
+
+                        <span class="font-semibold text-gray-700">
+                            <i class="bi bi-check-circle text-green-600 mr-1"></i>
+                            Objeto encontrado
+                        </span>
+
+                    </label>
+
+                </div>
+
+            </section>
+
+            <section class="space-y-5">
+
+                <h2
+                    id="tituloFormulario"
+                    class="text-lg font-bold text-[#0B402B]">
+
+                    Información del objeto perdido
+
+                </h2>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+
+                    {% for field in form %}
+
+                        <div
+                            {% if field.name == 'pregunta_seguridad' or field.name == 'respuesta_seguridad' %}
+                                data-campo-seguridad
+                            {% endif %}
+
+                            class="flex flex-col gap-2
+                            {% if field.name == 'foto' or field.name == 'descripcion' or field.name == 'pregunta_seguridad' or field.name == 'respuesta_seguridad' %}
+                                md:col-span-2
+                            {% endif %}">
+
+                            <label
+                                for="{{ field.id_for_label }}"
+                                class="font-semibold text-gray-700 text-sm">
+
+                                {% if field.name == 'descripcion' %}
+
+                                    <p class="text-xs text-[#217351]">
+                                        <i class="bi bi-info-circle mr-1"></i>
+                                        Obligatorio. Describe las características del objeto
+                                        para facilitar su identificación.
+                                    </p>
+
+                                {% endif %}
+
+                                {% if field.name == 'lugar' %}
+
+                                    <span id="textoLugar">
+                                        Lugar donde lo perdiste
+                                    </span>
+
+                                {% elif field.name == 'fecha_suceso' %}
+
+                                    <span id="textoFecha">
+                                        Fecha aproximada de pérdida
+                                    </span>
+
+                                {% else %}
+
+                                    {{ field.label }}
+
+                                {% endif %}
+
+                            </label>
+
+                            {{ field }}
+
+                            {% if field.name == 'lugar' %}
+
+                                <p class="text-xs text-gray-500">
+                                    Ejemplo: Biblioteca, segundo piso, cafetería principal.
+                                </p>
+
+                            {% endif %}
+
+                            {% if field.name == 'foto' %}
+
+                                <div id="vistaPrevia" class="hidden mt-3">
+
+                                    <div class="flex items-center justify-between mb-3">
+
+                                        <p class="text-sm font-semibold text-gray-600">
+                                            Vista previa
+                                        </p>
+
+                                        <button
+                                            type="button"
+                                            id="quitarFoto"
+                                            class="flex items-center gap-2 text-sm font-semibold text-red-600 hover:text-red-800 transition">
+
+                                            <i class="bi bi-trash"></i>
+                                            Quitar imagen
+
+                                        </button>
+
+                                    </div>
+
+                                    <img
+                                        id="imagenPrevia"
+                                        alt="Fotografía seleccionada"
+                                        class="w-full max-h-56 object-contain rounded-xl border border-gray-200 bg-gray-50"
+                                    >
+
+                                </div>
+
+                                
+                                <p id="mensajeFoto" class="text-xs text-gray-500 leading-relaxed">
+
+                                    <i class="bi bi-info-circle mr-1"></i>
+
+                                    La fotografía es opcional. Si perdiste un objeto
+                                    y tienes una foto anterior, puedes adjuntarla.
+                                    Si no tienes ninguna, puedes publicar el reporte
+                                    solamente con su descripción.
+
+                                    <span class="block mt-1">
+                                        Formatos permitidos: JPG, PNG o WEBP. Máximo 5 MB.
+                                    </span>
+
+                                </p>
+
+                            {% endif %}
+
+                            {% for error in field.errors %}
+
+                                <p data-error-formulario class="text-red-600 text-xs font-medium">
+                                    {{ error }}
+                                </p>
+
+                            {% endfor %}
+
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+            </section>
+
+            <div
+                id="avisoSeguridad"
+                class="hidden bg-blue-50 border border-blue-200 rounded-xl p-4 text-sm text-blue-800">
+
+                <i class="bi bi-shield-lock mr-2"></i>
+
+                La pregunta de seguridad ayudará a verificar que una persona sea realmente la propietaria del objeto encontrado. Su respuesta no será pública.
+
             </div>
 
-            <!-- Botón de Publicar Reporte -->
-            <div class="flex justify-end pt-4">
-                <button type="submit" class="bg-[#0B402B] text-white px-8 py-3 rounded-xl font-bold hover:bg-[#082E20] transition shadow-md flex items-center gap-2">
-                    <i class="bi bi-send"></i> Publicar Reporte
+            <div class="flex flex-col-reverse sm:flex-row justify-end gap-3 pt-5 border-t border-gray-100">
+
+                <button
+                    type="button"
+                    id="limpiarFormulario"
+                    class="px-6 py-3 text-center border border-gray-300 rounded-xl font-semibold text-gray-600 hover:bg-gray-100 transition">
+
+                    <i class="bi bi-arrow-counterclockwise mr-2"></i>
+                    Limpiar formulario
+
                 </button>
+
+                <button
+                    type="submit"
+                    class="bg-[#0B402B] text-white px-8 py-3 rounded-xl font-bold hover:bg-[#135A3E] transition">
+
+                    <i class="bi bi-send mr-2"></i>
+                    Publicar reporte
+
+                </button>
+
             </div>
+
         </form>
 
-</body>
-</html>
+    </section>
+
+</div>
+
+<script>
+
+    const radios = document.querySelectorAll(
+        'input[name="tipo_reporte"]'
+    );
+
+    const tituloFormulario = document.getElementById(
+        'tituloFormulario'
+    );
+
+    const textoLugar = document.getElementById(
+        'textoLugar'
+    );
+
+    const textoFecha = document.getElementById(
+        'textoFecha'
+    );
+
+    const avisoSeguridad = document.getElementById(
+        'avisoSeguridad'
+    );
+
+    const camposSeguridad = document.querySelectorAll(
+        '[data-campo-seguridad]'
+    );
+
+    function actualizarTipo() {
+
+        const seleccionado = document.querySelector(
+            'input[name="tipo_reporte"]:checked'
+        );
+
+        if (!seleccionado) {
+            return;
+        }
+
+        const encontrado = seleccionado.value === 'ENCONTRADO';
+
+
+        const foto = document.querySelector('input[name="foto"]');
+        const mensajeFoto = document.getElementById('mensajeFoto');
+
+        if (foto) {
+            foto.required = encontrado;
+        }
+
+        if (mensajeFoto) {
+
+            mensajeFoto.innerHTML = encontrado
+                ? `
+                    <i class="bi bi-info-circle mr-1"></i>
+                    La fotografía es obligatoria para los objetos encontrados.
+                    Toma una fotografía clara del objeto para facilitar
+                    su identificación.
+
+                    <span class="block mt-1">
+                        Formatos permitidos: JPG, PNG o WEBP. Máximo 5 MB.
+                    </span>
+                `
+                : `
+                    <i class="bi bi-info-circle mr-1"></i>
+                    La fotografía es opcional. Si perdiste un objeto
+                    y tienes una foto anterior, puedes adjuntarla.
+                    Si no tienes ninguna, puedes publicar el reporte
+                    solamente con su descripción.
+
+                    <span class="block mt-1">
+                        Formatos permitidos: JPG, PNG o WEBP. Máximo 5 MB.
+                    </span>
+                `;
+
+        }
+
+
+        tituloFormulario.textContent = encontrado
+            ? 'Información del objeto encontrado'
+            : 'Información del objeto perdido';
+
+        textoLugar.textContent = encontrado
+            ? 'Lugar donde lo encontraste'
+            : 'Lugar donde lo perdiste';
+
+        textoFecha.textContent = encontrado
+            ? 'Fecha aproximada del hallazgo'
+            : 'Fecha aproximada de pérdida';
+
+        avisoSeguridad.classList.toggle(
+            'hidden',
+            !encontrado
+        );
+
+        camposSeguridad.forEach(function(contenedor) {
+
+            contenedor.classList.toggle(
+                'hidden',
+                !encontrado
+            );
+
+            const campos = contenedor.querySelectorAll(
+                'input, textarea, select'
+            );
+
+            campos.forEach(function(campo) {
+
+                campo.disabled = !encontrado;
+                campo.required = encontrado;
+
+            });
+
+        });
+
+    }
+
+    radios.forEach(function(radio) {
+
+        radio.addEventListener(
+            'change',
+            actualizarTipo
+        );
+
+    });
+
+    actualizarTipo();
+
+    const inputFoto = document.querySelector(
+        'input[name="foto"]'
+    );
+
+    const vistaPrevia = document.getElementById(
+        'vistaPrevia'
+    );
+
+    const imagenPrevia = document.getElementById(
+        'imagenPrevia'
+    );
+
+    const quitarFoto = document.getElementById(
+        'quitarFoto'
+    );
+
+    let urlAnterior = null;
+
+    function limpiarFoto() {
+
+        if (urlAnterior) {
+
+            URL.revokeObjectURL(urlAnterior);
+            urlAnterior = null;
+
+        }
+
+        if (inputFoto) {
+            inputFoto.value = '';
+        }
+
+        if (imagenPrevia) {
+            imagenPrevia.removeAttribute('src');
+        }
+
+        if (vistaPrevia) {
+            vistaPrevia.classList.add('hidden');
+        }
+
+    }
+
+    if (inputFoto && vistaPrevia && imagenPrevia) {
+
+        inputFoto.addEventListener('change', function() {
+
+            const archivo = this.files[0];
+
+            if (!archivo || !archivo.type.startsWith('image/')) {
+
+                limpiarFoto();
+                return;
+
+            }
+
+            if (urlAnterior) {
+                URL.revokeObjectURL(urlAnterior);
+            }
+
+            urlAnterior = URL.createObjectURL(archivo);
+
+            imagenPrevia.src = urlAnterior;
+
+            vistaPrevia.classList.remove('hidden');
+
+        });
+
+    }
+
+    if (quitarFoto && inputFoto && vistaPrevia && imagenPrevia) {
+
+        quitarFoto.addEventListener('click', function() {
+
+            limpiarFoto();
+
+        });
+
+    }
+
+
+
+const botonLimpiar = document.getElementById('limpiarFormulario');
+
+const formularioReporte = document.querySelector(
+    'form[enctype="multipart/form-data"]'
+);
+
+botonLimpiar.addEventListener('click', function() {
+
+    formularioReporte.querySelectorAll(
+        'input, textarea, select'
+    ).forEach(function(campo) {
+
+        if (campo.type === 'hidden') {
+            return;
+        }
+
+        if (campo.type === 'radio') {
+
+            campo.checked = (
+                campo.name === 'tipo_reporte' &&
+                campo.value === 'PERDIDO'
+            );
+
+            return;
+        }
+
+        if (campo.type === 'checkbox') {
+            campo.checked = false;
+            return;
+        }
+
+        if (campo.tagName === 'SELECT') {
+            campo.selectedIndex = 0;
+            return;
+        }
+
+        campo.value = '';
+
+    });
+
+    limpiarFoto();
+
+    actualizarTipo();
+
+    formularioReporte.querySelectorAll(
+        '[data-error-formulario]'
+    ).forEach(function(error) {
+        error.remove();
+    });
+
+});
+
+
+</script>
+
+{% endblock %}

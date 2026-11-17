@@ -1,0 +1,922 @@
+{% extends 'gestion_objetos/base.html' %}
+
+{% block titulo_documento %}
+
+Mis reportes - SafeItems
+
+{% endblock %}
+
+{% block titulo_pagina %}
+
+Mis reportes
+
+{% endblock %}
+
+{% block contenido %}
+
+<div class="p-5 md:p-8 max-w-7xl mx-auto space-y-6">
+
+    {% if messages %}
+
+        {% for message in messages %}
+
+            <div class="px-4 py-3 rounded-xl text-sm border
+
+                {% if message.tags == 'error' %}
+
+                    bg-red-50 text-red-700 border-red-200
+
+                {% else %}
+
+                    bg-green-50 text-green-800 border-green-200
+
+                {% endif %}">
+
+                {% if message.tags == 'error' %}
+
+                    <i class="bi bi-exclamation-circle-fill mr-2"></i>
+
+                {% else %}
+
+                    <i class="bi bi-check-circle-fill mr-2"></i>
+
+                {% endif %}
+
+                {{ message }}
+
+            </div>
+
+        {% endfor %}
+
+    {% endif %}
+
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+
+        <div>
+
+            <h1 class="text-2xl md:text-3xl font-bold text-[#0B402B]">
+
+                Mis reportes
+
+            </h1>
+
+            <p class="text-gray-500 text-sm mt-2">
+
+                Consulta tus objetos reportados y revisa su estado actual.
+
+            </p>
+
+        </div>
+
+    </div>
+
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+
+        <div class="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
+
+            <div class="flex items-center justify-between mb-3">
+
+                <span class="text-xs font-semibold text-gray-500">
+
+                    Total de reportes
+
+                </span>
+
+                <i class="bi bi-clipboard-data text-[#0B402B] text-xl"></i>
+
+            </div>
+
+            <p class="text-3xl font-bold text-[#0B402B]">
+
+                {{ total_reportes }}
+
+            </p>
+
+        </div>
+
+        <div class="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
+
+            <div class="flex items-center justify-between mb-3">
+
+                <span class="text-xs font-semibold text-gray-500">
+
+                    Perdidos
+
+                </span>
+
+                <i class="bi bi-exclamation-circle text-amber-600 text-xl"></i>
+
+            </div>
+
+            <p class="text-3xl font-bold text-gray-800">
+
+                {{ total_perdidos }}
+
+            </p>
+
+        </div>
+
+        <div class="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
+
+            <div class="flex items-center justify-between mb-3">
+
+                <span class="text-xs font-semibold text-gray-500">
+
+                    Encontrados
+
+                </span>
+
+                <i class="bi bi-check-circle text-green-600 text-xl"></i>
+
+            </div>
+
+            <p class="text-3xl font-bold text-gray-800">
+
+                {{ total_encontrados }}
+
+            </p>
+
+        </div>
+
+        <div class="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
+
+            <div class="flex items-center justify-between mb-3">
+
+                <span class="text-xs font-semibold text-gray-500">
+
+                    Reclamados
+
+                </span>
+
+                <i class="bi bi-box-seam text-blue-600 text-xl"></i>
+
+            </div>
+
+            <p class="text-3xl font-bold text-gray-800">
+
+                {{ total_reclamados }}
+
+            </p>
+
+        </div>
+
+    </div>
+
+    <!-- HISTORIAL DE MIS RECLAMACIONES -->
+    <section id="mis-reclamaciones"
+            class="bg-white border border-gray-200 rounded-2xl p-5 md:p-6 shadow-sm space-y-4">
+
+        <div>
+            <h2 class="text-lg font-bold text-[#0B402B]">
+                <i class="bi bi-clock-history mr-2"></i>
+                Mis reclamaciones
+            </h2>
+
+            <p class="text-sm text-gray-500 mt-1">
+                Consulta las solicitudes que hiciste para recuperar
+                objetos y cómo avanzaron.
+            </p>
+        </div>
+
+        {% for solicitud in request.user.reclamaciones_realizadas.all %}
+
+            <article class="border border-gray-200 rounded-xl p-4
+                            flex flex-col sm:flex-row sm:items-center
+                            sm:justify-between gap-3">
+
+                <div class="min-w-0 space-y-1">
+
+                    <div class="flex flex-wrap items-center gap-2">
+
+                        <p class="font-semibold text-[#0B402B] break-words">
+                            {{ solicitud.objeto.titulo }}
+                        </p>
+
+                        <span class="rounded-full text-xs font-semibold px-2.5 py-1
+                            {% if solicitud.estado == 'PENDIENTE' %}
+                                bg-amber-100 text-amber-800
+                            {% elif solicitud.estado == 'APROBADA' %}
+                                bg-green-100 text-green-800
+                            {% elif solicitud.estado == 'RECHAZADA' %}
+                                bg-red-100 text-red-700
+                            {% else %}
+                                bg-blue-100 text-blue-800
+                            {% endif %}">
+
+                            {{ solicitud.get_estado_display }}
+
+                        </span>
+
+                    </div>
+
+                    <p class="text-xs text-gray-500">
+                        Solicitud #{{ solicitud.id }} ·
+                        {{ solicitud.fecha_solicitud|date:"d/m/Y H:i" }}
+                    </p>
+
+                </div>
+
+                <a href="{% url 'mi_entrega' solicitud.id %}"
+                class="shrink-0 inline-flex items-center justify-center
+                        gap-2 rounded-xl bg-[#E8F8EE] hover:bg-[#D0ECD7]
+                        text-[#0B402B] px-4 py-3 font-semibold text-sm transition">
+
+                    <i class="bi bi-clock-history"></i>
+                    Ver seguimiento
+
+                </a>
+
+            </article>
+
+        {% empty %}
+
+            <div class="rounded-xl bg-gray-50 px-4 py-5 text-sm text-gray-500">
+                Todavía no has realizado ninguna reclamación.
+            </div>
+
+        {% endfor %}
+
+    </section>
+
+    <form
+
+        method="get"
+
+        action="{% url 'mis_reportes' %}"
+
+        class="bg-white border border-gray-200 rounded-2xl p-4 md:p-5 shadow-sm">
+
+        <div class="flex flex-col md:flex-row gap-3">
+
+            <div class="relative flex-1">
+
+                <i class="bi bi-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+
+                <input
+
+                    type="search"
+
+                    name="q"
+
+                    value="{{ busqueda }}"
+
+                    placeholder="Buscar entre mis reportes..."
+
+                    class="w-full pl-11 pr-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-sm focus:outline-none focus:border-[#0B402B] focus:ring-2 focus:ring-[#0B402B]/10"
+
+                >
+
+            </div>
+
+            <select
+
+                name="estado"
+
+                aria-label="Filtrar por estado"
+
+                class="w-full md:w-52 px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-sm text-gray-700 focus:outline-none focus:border-[#0B402B]">
+
+                <option value="">
+
+                    Todos los estados
+
+                </option>
+
+                <option
+
+                    value="PERDIDO"
+
+                    {% if estado == 'PERDIDO' %}selected{% endif %}>
+
+                    Perdidos
+
+                </option>
+
+                <option
+
+                    value="ENCONTRADO"
+
+                    {% if estado == 'ENCONTRADO' %}selected{% endif %}>
+
+                    Encontrados
+
+                </option>
+
+                <option
+
+                    value="RECLAMADO"
+
+                    {% if estado == 'RECLAMADO' %}selected{% endif %}>
+
+                    Reclamados
+
+                </option>
+
+            </select>
+
+            <button
+
+                type="submit"
+
+                class="bg-[#0B402B] hover:bg-[#135A3E] text-white px-6 py-3 rounded-xl text-sm font-semibold transition">
+
+                <i class="bi bi-funnel mr-1"></i>
+
+                Filtrar
+
+            </button>
+
+            <a
+
+                href="{% url 'mis_reportes' %}"
+
+                class="flex items-center justify-center px-4 py-3 border border-gray-200 rounded-xl text-gray-600 text-sm font-semibold hover:bg-gray-50 transition">
+
+                Limpiar
+
+            </a>
+
+        </div>
+
+    </form>
+
+    <section class="space-y-5">
+
+        <div class="flex items-center justify-between gap-4">
+
+            <h2 class="text-lg font-bold text-gray-800">
+
+                Mis publicaciones
+
+            </h2>
+
+            <span class="text-sm text-gray-500">
+
+                {{ page_obj.paginator.count }}
+
+                resultado{{ page_obj.paginator.count|pluralize }}
+
+            </span>
+
+        </div>
+
+        <div class="grid grid-cols-1 xl:grid-cols-2 gap-5">
+
+            {% for objeto in page_obj %}
+
+                <article class="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden hover:shadow-md transition">
+
+                    <div class="flex flex-col sm:flex-row h-full">
+
+                        <div class="w-full sm:w-44 h-48 sm:h-auto bg-[#E8F8EE] shrink-0">
+
+                            {% if objeto.foto %}
+
+                                <img
+
+                                    src="{{ objeto.foto.url }}"
+
+                                    alt="Fotografía de {{ objeto.titulo }}"
+
+                                    class="w-full h-full object-cover"
+
+                                    loading="lazy"
+
+                                >
+
+                            {% else %}
+
+                                <div class="w-full h-full min-h-44 flex flex-col items-center justify-center gap-2 text-[#217351]">
+
+                                    <i class="bi bi-image text-4xl opacity-50"></i>
+
+                                    <span class="text-xs">
+
+                                        Sin fotografía
+
+                                    </span>
+
+                                </div>
+
+                            {% endif %}
+
+                        </div>
+
+                        <div class="p-5 flex-1 min-w-0 flex flex-col gap-3">
+
+                            <div class="flex flex-wrap items-center gap-2">
+
+                                {% if objeto.estado == 'PERDIDO' %}
+
+                                    <span class="inline-flex items-center gap-1 rounded-full bg-amber-100 text-amber-800 text-xs font-bold px-3 py-1">
+
+                                        <i class="bi bi-exclamation-circle-fill"></i>
+
+                                        Perdido
+
+                                    </span>
+
+                                {% elif objeto.estado == 'ENCONTRADO' %}
+
+                                    <span class="inline-flex items-center gap-1 rounded-full bg-green-100 text-green-800 text-xs font-bold px-3 py-1">
+
+                                        <i class="bi bi-check-circle-fill"></i>
+
+                                        Encontrado
+
+                                    </span>
+
+                                {% else %}
+
+                                    <span class="inline-flex items-center gap-1 rounded-full bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1">
+
+                                        <i class="bi bi-box-seam"></i>
+
+                                        Reclamado
+
+                                    </span>
+
+                                {% endif %}
+
+                                {% if objeto.tiene_avisos_hallazgo %}
+                                    <span class="inline-flex items-center gap-1 rounded-full bg-amber-50 border border-amber-200 text-amber-800 text-xs font-bold px-3 py-1">
+                                        <i class="bi bi-bell-fill"></i>
+                                        Aviso recibido
+                                    </span>
+                                {% endif %}
+
+                                {% if objeto.tiene_reclamacion_en_proceso %}
+
+                                    <span class="inline-flex items-center gap-1 rounded-full bg-amber-50 border border-amber-200 text-amber-800 text-xs font-bold px-3 py-1">
+
+                                        <i class="bi bi-hourglass-split"></i>
+
+                                        En reclamación
+
+                                    </span>
+
+                                {% endif %}
+
+                            </div>
+
+                            <div>
+
+                                <h3 class="text-lg font-bold text-[#0B402B] break-words">
+
+                                    {{ objeto.titulo }}
+
+                                </h3>
+
+                                <p class="text-xs text-[#217351] font-semibold mt-1">
+
+                                    <i class="bi bi-tag mr-1"></i>
+
+                                    {{ objeto.categoria|default:"Sin categoría" }}
+
+                                </p>
+
+                            </div>
+
+                            <div class="space-y-2 text-sm text-gray-600">
+
+                                <p class="break-words">
+
+                                    <i class="bi bi-geo-alt text-[#217351] mr-1"></i>
+
+                                    {{ objeto.lugar|default:"Lugar no indicado" }}
+
+                                </p>
+
+                                <p>
+
+                                    <i class="bi bi-calendar3 text-[#217351] mr-1"></i>
+
+                                    {% if objeto.fecha_suceso %}
+
+                                        {{ objeto.fecha_suceso|date:"d/m/Y" }}
+
+                                    {% else %}
+
+                                        Fecha no indicada
+
+                                    {% endif %}
+
+                                </p>
+
+                            </div>
+
+                            <div class="bg-gray-50 border border-gray-100 rounded-xl p-3 mt-auto">
+
+                                <p class="text-xs font-bold text-gray-700 mb-1">
+
+                                    <i class="bi bi-clock-history mr-1"></i>
+
+                                    Estado actual
+
+                                </p>
+
+                                <p class="text-xs text-gray-500">
+
+                                    {% if objeto.tiene_avisos_hallazgo %}
+
+                                        Tu objeto perdido ya recibió un aviso de hallazgo.
+
+                                    {% elif objeto.tiene_reclamacion_en_proceso %}
+
+                                        Este reporte tiene una reclamación en revisión.
+
+                                    {% elif objeto.estado == 'PERDIDO' %}
+
+                                        Tu reporte de objeto perdido está registrado.
+
+                                    {% elif objeto.estado == 'ENCONTRADO' %}
+
+                                        Tu reporte de objeto encontrado está registrado.
+
+                                    {% else %}
+
+                                        Este objeto figura como reclamado.
+
+                                    {% endif %}
+
+                                </p>
+
+                            </div>
+
+                            <div class="mt-auto space-y-2">
+
+                                <a
+
+                                    href="{% url 'detalle_objeto' objeto.id %}?desde=mis_reportes"
+
+                                    class="flex items-center justify-center gap-2 w-full bg-[#0B402B] hover:bg-[#135A3E] text-white text-sm font-semibold py-3 rounded-xl transition">
+
+                                    <i class="bi bi-eye"></i>
+
+                                    Ver detalles
+
+                                </a>
+
+                                {% if objeto.estado != 'RECLAMADO' %}
+
+    {% if objeto.tiene_avisos_hallazgo %}
+
+        <div class="flex items-start gap-2 rounded-xl bg-amber-50 border border-amber-200 px-4 py-3 text-sm text-amber-800">
+            <i class="bi bi-lock-fill mt-0.5"></i>
+            <p>
+                Este reporte ya recibió un aviso de hallazgo.
+                No puedes editarlo ni eliminarlo.
+            </p>
+        </div>
+
+    {% elif objeto.tiene_reclamacion_en_proceso %}
+
+        <div class="flex items-start gap-2 rounded-xl bg-amber-50 border border-amber-200 px-4 py-3 text-sm text-amber-800">
+
+            <i class="bi bi-lock-fill mt-0.5"></i>
+
+            <p>
+
+                Este reporte tiene una reclamación en proceso.
+
+                No puedes editarlo ni eliminarlo hasta que se resuelva.
+
+            </p>
+
+        </div>
+
+    {% else %}
+
+        <div class="grid {% if objeto.tiene_historial_reclamaciones %}grid-cols-1{% else %}grid-cols-2{% endif %} gap-2">
+
+            <a
+
+                href="{% url 'editar_reporte' objeto.id %}"
+
+                class="flex items-center justify-center gap-2 px-3 py-3 rounded-xl bg-[#E8F8EE] text-[#0B402B] hover:bg-[#D0ECD7] font-semibold text-sm transition">
+
+                <i class="bi bi-pencil-square"></i>
+
+                Editar
+
+            </a>
+
+            {% if not objeto.tiene_historial_reclamaciones %}
+
+                <form method="post"
+
+                      action="{% url 'eliminar_reporte' objeto.id %}"
+
+                      class="form-eliminar">
+
+                    {% csrf_token %}
+
+                    <button type="button"
+
+                            data-abrir-modal-eliminar
+
+                            data-objeto="{{ objeto.titulo }}"
+
+                            class="w-full flex items-center justify-center gap-2 px-3 py-3 rounded-xl bg-red-50 text-red-600 hover:bg-red-100 font-semibold text-sm transition">
+
+                        <i class="bi bi-trash3"></i>
+
+                        Eliminar
+
+                    </button>
+
+                </form>
+
+            {% endif %}
+
+        </div>
+
+        {% if objeto.tiene_historial_reclamaciones %}
+
+            <div class="flex items-start gap-2 rounded-xl bg-gray-50 border border-gray-200 px-4 py-3 text-xs text-gray-600">
+
+                <i class="bi bi-info-circle mt-0.5"></i>
+
+                <p>
+
+                    Este reporte tiene historial de reclamaciones.
+
+                    Puedes editarlo, pero no eliminarlo definitivamente.
+
+                </p>
+
+            </div>
+
+        {% endif %}
+
+    {% endif %}
+
+{% else %}
+
+    <div class="flex items-start gap-2 rounded-xl bg-blue-50 border border-blue-200 px-4 py-3 text-xs text-blue-800">
+
+        <i class="bi bi-check-circle-fill mt-0.5"></i>
+
+        <p>Este reporte está cerrado y no puede modificarse ni eliminarse.</p>
+
+    </div>
+
+{% endif %}
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </article>
+
+                    {% empty %}
+
+                        <div class="xl:col-span-2 bg-white rounded-2xl border border-gray-200 p-10 text-center">
+
+                            <div class="w-20 h-20 rounded-full bg-[#E8F8EE] flex items-center justify-center mx-auto mb-5">
+
+                                <i class="bi bi-clipboard-x text-4xl text-[#0B402B]"></i>
+
+                            </div>
+
+                            {% if busqueda or estado %}
+
+                                <h3 class="text-lg font-bold text-gray-800">
+
+                                    No encontramos reportes
+
+                                </h3>
+
+                                <p class="text-sm text-gray-500 mt-2">
+
+                                    No tienes reportes que coincidan con los filtros seleccionados.
+
+                                </p>
+
+                            {% else %}
+
+                                <h3 class="text-lg font-bold text-gray-800">
+
+                                    No tienes reportes
+
+                                </h3>
+
+                                <p class="text-sm text-gray-500 mt-2">
+
+                                    Todavía no has publicado ningún objeto perdido o encontrado.
+
+                                </p>
+
+                            {% endif %}
+
+                        </div>
+
+                    {% endfor %}
+
+        </div>
+
+        {% if page_obj.has_other_pages %}
+
+            <div class="flex flex-wrap items-center justify-center gap-4 pt-5">
+
+                {% if page_obj.has_previous %}
+
+                    <a
+
+                        href="?q={{ busqueda|urlencode }}&amp;estado={{ estado|urlencode }}&amp;page={{ page_obj.previous_page_number }}"
+
+                        class="px-4 py-2 rounded-xl bg-white border border-gray-200 text-sm font-semibold text-[#0B402B] hover:bg-[#E8F8EE] transition">
+
+                        <i class="bi bi-chevron-left mr-1"></i>
+
+                        Anterior
+
+                    </a>
+
+                {% endif %}
+
+                <span class="text-sm font-medium text-gray-600">
+
+                    Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
+
+                </span>
+
+                {% if page_obj.has_next %}
+
+                    <a
+
+                        href="?q={{ busqueda|urlencode }}&amp;estado={{ estado|urlencode }}&amp;page={{ page_obj.next_page_number }}"
+
+                        class="px-4 py-2 rounded-xl bg-white border border-gray-200 text-sm font-semibold text-[#0B402B] hover:bg-[#E8F8EE] transition">
+
+                        Siguiente
+
+                        <i class="bi bi-chevron-right ml-1"></i>
+
+                    </a>
+
+                {% endif %}
+
+            </div>
+
+        {% endif %}
+
+    </section>
+
+</div>
+
+<dialog
+
+    id="modalEliminarReporte"
+
+    aria-labelledby="tituloEliminarReporte"
+
+    class="w-[calc(100%-2rem)] max-w-md max-h-[90vh] overflow-y-auto m-auto p-0 rounded-2xl border-0 shadow-2xl backdrop:bg-black/60">
+
+    <div class="bg-white">
+
+        <div class="px-6 pt-7 pb-5 text-center">
+
+            <div class="mx-auto mb-4 w-16 h-16 rounded-full bg-red-100 flex items-center justify-center">
+
+                <i class="bi bi-trash3 text-red-600 text-2xl"></i>
+
+            </div>
+
+            <h3
+
+                id="tituloEliminarReporte"
+
+                class="text-xl font-bold text-[#0B402B]">
+
+                Eliminar reporte
+
+            </h3>
+
+            <p class="text-sm text-gray-600 mt-3 leading-relaxed">
+
+                ¿Estás seguro de que deseas eliminar el reporte
+
+                <span
+
+                    id="nombreObjetoModal"
+
+                    class="font-bold text-[#0B402B] break-words">
+
+                </span>?
+
+            </p>
+
+            <p class="text-xs text-red-500 mt-3">
+
+                Esta acción no se puede deshacer.
+
+            </p>
+
+        </div>
+
+        <div class="px-6 pb-6 flex flex-col-reverse sm:flex-row gap-3 sm:justify-center">
+
+            <button
+
+                type="button"
+
+                id="cerrarModalEliminar"
+
+                class="flex-1 px-5 py-3 rounded-xl border border-gray-300 text-gray-700 font-semibold text-sm hover:bg-gray-50 transition">
+
+                Cancelar
+
+            </button>
+
+            <button
+
+                type="button"
+
+                id="confirmarEliminarReporte"
+
+                class="flex-1 px-5 py-3 rounded-xl bg-red-600 text-white font-semibold text-sm hover:bg-red-700 transition">
+
+                <i class="bi bi-trash3 mr-1"></i>
+
+                Sí, eliminar
+
+            </button>
+
+        </div>
+
+    </div>
+
+</dialog>
+
+<script>
+
+    const modalEliminar = document.getElementById('modalEliminarReporte');
+
+    const nombreObjetoModal = document.getElementById('nombreObjetoModal');
+
+    const cerrarModalEliminar = document.getElementById('cerrarModalEliminar');
+
+    const confirmarEliminarReporte = document.getElementById('confirmarEliminarReporte');
+
+    let formularioAEliminar = null;
+
+    document.querySelectorAll('[data-abrir-modal-eliminar]').forEach(function(boton) {
+
+        boton.addEventListener('click', function() {
+
+            formularioAEliminar = this.closest('form');
+
+            nombreObjetoModal.textContent = this.dataset.objeto || 'seleccionado';
+
+            confirmarEliminarReporte.disabled = false;
+
+            modalEliminar.showModal();
+
+            cerrarModalEliminar.focus();
+
+        });
+
+    });
+
+    cerrarModalEliminar.addEventListener('click', function() {
+
+        modalEliminar.close();
+
+    });
+
+    confirmarEliminarReporte.addEventListener('click', function() {
+
+        if (formularioAEliminar) {
+
+            confirmarEliminarReporte.disabled = true;
+
+            formularioAEliminar.requestSubmit();
+
+        }
+
+    });
+
+    modalEliminar.addEventListener('click', function(event) {
+
+        if (event.target === modalEliminar) {
+
+            modalEliminar.close();
+
+        }
+
+    });
+
+    modalEliminar.addEventListener('close', function() {
+
+        formularioAEliminar = null;
+
+        confirmarEliminarReporte.disabled = false;
+
+    });
+
+</script>
+
+{% endblock %}

@@ -1,0 +1,464 @@
+
+{% extends 'gestion_objetos/base.html' %}
+
+{% block titulo_documento %}
+Lo encontré - SafeItems
+{% endblock %}
+
+{% block titulo_pagina %}
+Lo encontré
+{% endblock %}
+
+{% block contenido %}
+
+<div class="p-5 md:p-8 max-w-4xl mx-auto space-y-6">
+
+    <a href="{% url 'detalle_objeto' objeto.id %}"
+       class="inline-flex items-center gap-2 text-sm font-semibold text-[#0B402B] hover:underline">
+
+        <i class="bi bi-arrow-left"></i>
+        Volver a los detalles
+
+    </a>
+
+    <div>
+        <h1 class="text-2xl md:text-3xl font-bold text-[#0B402B]">
+            Informar que encontré un objeto
+        </h1>
+
+        <p class="text-gray-500 text-sm mt-2">
+            Completa la información para avisarle al propietario
+            que encontraste un objeto que podría ser el suyo.
+        </p>
+    </div>
+
+    {% if messages %}
+
+        {% for message in messages %}
+
+            <div class="rounded-xl border p-4 text-sm
+                {% if message.tags == 'error' %}
+                    bg-red-50 border-red-200 text-red-700
+                {% elif message.tags == 'success' %}
+                    bg-green-50 border-green-200 text-green-800
+                {% else %}
+                    bg-blue-50 border-blue-200 text-blue-800
+                {% endif %}">
+
+                {{ message }}
+
+            </div>
+
+        {% endfor %}
+
+    {% endif %}
+
+    <section class="bg-white rounded-3xl border border-gray-200 shadow-sm overflow-hidden">
+
+        <div class="bg-gradient-to-r from-[#D0ECD7] to-[#E8F8EE] px-6 py-5 border-b border-[#bce2c7]">
+
+            <div class="flex items-center gap-3">
+
+                <div class="w-11 h-11 bg-white/70 rounded-xl flex items-center justify-center">
+                    <i class="bi bi-box-seam text-xl text-[#0B402B]"></i>
+                </div>
+
+                <div>
+                    <h2 class="text-lg font-bold text-[#0B402B]">
+                        Objeto reportado como perdido
+                    </h2>
+
+                    <p class="text-sm text-[#217351]">
+                        Información de la publicación.
+                    </p>
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="p-6 space-y-3">
+
+            <h3 class="text-xl font-bold text-gray-800 break-words">
+                {{ objeto.titulo }}
+            </h3>
+
+            <p class="text-sm text-gray-600">
+                <i class="bi bi-tag text-[#217351] mr-2"></i>
+                {{ objeto.categoria|default:"Sin categoría" }}
+            </p>
+
+            <p class="text-sm text-gray-600">
+                <i class="bi bi-geo-alt text-[#217351] mr-2"></i>
+                {{ objeto.lugar|default:"Lugar no indicado" }}
+            </p>
+
+        </div>
+
+    </section>
+
+    {% if aviso_existente %}
+
+        <section class="bg-[#E8F8EE] border border-[#D0ECD7] rounded-2xl p-6">
+
+            <div class="flex items-start gap-3">
+
+                <i class="bi bi-check-circle-fill text-[#0B402B] text-2xl"></i>
+
+                <div>
+
+                    <h3 class="font-bold text-[#0B402B]">
+                        Ya enviaste un aviso
+                    </h3>
+
+                    <p class="text-sm text-gray-600 mt-2">
+                        Tu aviso fue registrado correctamente.
+                        No necesitas enviarlo nuevamente.
+                    </p>
+
+                    <p class="text-sm font-semibold text-[#0B402B] mt-3">
+                        Estado: {{ aviso_existente.get_estado_display }}
+                    </p>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    {% else %}
+
+        <section class="bg-white rounded-3xl border border-gray-200 shadow-sm overflow-hidden">
+
+            <div class="bg-gradient-to-r from-[#D0ECD7] to-[#E8F8EE] px-6 py-6 border-b border-[#bce2c7]">
+
+                <div class="flex items-center gap-3">
+
+                    <div class="w-12 h-12 bg-white/70 rounded-xl flex items-center justify-center">
+                        <i class="bi bi-clipboard-check text-2xl text-[#0B402B]"></i>
+                    </div>
+
+                    <div>
+
+                        <h2 class="text-lg font-bold text-[#0B402B]">
+                            Información del hallazgo
+                        </h2>
+
+                        <p class="text-sm text-[#217351] mt-1">
+                            Describe el objeto y adjunta una fotografía.
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <form
+                method="post"
+                enctype="multipart/form-data"
+                class="p-6 md:p-8 space-y-7">
+
+                {% csrf_token %}
+
+                <input
+                    type="hidden"
+                    name="version_reporte"
+                    value="{{ version_reporte }}"
+                >
+
+                {% if form.non_field_errors %}
+
+                    <div class="bg-red-50 border border-red-200 rounded-xl p-4 text-sm text-red-700">
+                        {{ form.non_field_errors }}
+                    </div>
+
+                {% endif %}
+
+                <div class="space-y-6">
+
+                    <div class="flex flex-col gap-2">
+
+                        <label
+                            for="{{ form.lugar_hallazgo.id_for_label }}"
+                            class="font-semibold text-gray-700 text-sm">
+
+                            ¿Dónde encontraste el objeto?
+                            <span class="text-red-600">*</span>
+
+                        </label>
+
+                        {{ form.lugar_hallazgo }}
+
+                        <p class="text-xs text-gray-500">
+                            Ejemplo: Biblioteca, segundo piso, cafetería principal.
+                        </p>
+
+                        {% for error in form.lugar_hallazgo.errors %}
+
+                            <p class="text-red-600 text-xs font-medium">
+                                {{ error }}
+                            </p>
+
+                        {% endfor %}
+
+                    </div>
+
+                    <div class="flex flex-col gap-2">
+
+                        <label
+                            for="{{ form.descripcion.id_for_label }}"
+                            class="font-semibold text-gray-700 text-sm">
+
+                            Describe el objeto que encontraste
+                            <span class="text-red-600">*</span>
+
+                        </label>
+
+                        {{ form.descripcion }}
+
+                        <p class="text-xs text-gray-500">
+                            Describe sus características y algún detalle
+                            que permita identificarlo.
+                        </p>
+
+                        {% for error in form.descripcion.errors %}
+
+                            <p class="text-red-600 text-xs font-medium">
+                                {{ error }}
+                            </p>
+
+                        {% endfor %}
+
+                    </div>
+
+                    <div class="flex flex-col gap-2">
+
+                        <label
+                            for="{{ form.foto.id_for_label }}"
+                            class="font-semibold text-gray-700 text-sm">
+
+                            Fotografía del objeto
+                            <span class="text-red-600">*</span>
+
+                        </label>
+
+                        {{ form.foto }}
+
+                        <div id="contenedorVistaPrevia" class="hidden mt-3">
+
+                            <div class="flex items-center justify-between gap-3 mb-3">
+
+                                <p class="text-sm font-semibold text-gray-600">
+                                    Vista previa
+                                </p>
+
+                                <button
+                                    type="button"
+                                    id="botonQuitarFoto"
+                                    class="flex items-center gap-2 text-sm font-semibold text-red-600 hover:text-red-800 transition">
+
+                                    <i class="bi bi-trash"></i>
+                                    Quitar imagen
+
+                                </button>
+
+                            </div>
+
+                            <img
+                                id="imagenVistaPrevia"
+                                alt="Fotografía seleccionada"
+                                class="w-full max-h-56 object-contain rounded-xl border border-gray-200 bg-gray-50"
+                            >
+
+                        </div>
+
+                        <p class="text-xs text-gray-500 leading-relaxed">
+
+                            <i class="bi bi-info-circle mr-1"></i>
+
+                            La fotografía es obligatoria para demostrar
+                            que tienes físicamente un objeto que podría
+                            coincidir con el reporte.
+
+                            <span class="block mt-1">
+                                Formatos permitidos: JPG, PNG o WEBP.
+                                Máximo 5 MB.
+                            </span>
+
+                        </p>
+
+                        <p id="errorFotoCliente"
+                           role="alert"
+                           class="hidden text-red-600 text-xs font-medium"></p>
+
+                        {% for error in form.foto.errors %}
+
+                            <p class="text-red-600 text-xs font-medium">
+                                {{ error }}
+                            </p>
+
+                        {% endfor %}
+
+                    </div>
+
+                </div>
+
+                <div class="bg-[#E8F8EE] border border-[#D0ECD7] rounded-xl p-4">
+
+                    <p class="text-sm text-[#0B402B]">
+
+                        <i class="bi bi-shield-check mr-2"></i>
+
+                        El aviso será revisado antes de confirmar
+                        cualquier devolución del objeto.
+
+                    </p>
+
+                </div>
+
+                <div class="flex flex-col-reverse sm:flex-row justify-end gap-3 pt-4 border-t border-gray-100">
+
+                    <a
+                        href="{% url 'detalle_objeto' objeto.id %}"
+                        class="px-6 py-3 text-center border border-gray-300 rounded-xl font-semibold text-gray-600 hover:bg-gray-100 transition">
+
+                        Cancelar
+
+                    </a>
+
+                    <button
+                        type="submit"
+                        class="bg-[#0B402B] text-white px-8 py-3 rounded-xl font-semibold hover:bg-[#135A3E] transition">
+
+                        <i class="bi bi-send mr-2"></i>
+                        Enviar aviso
+
+                    </button>
+
+                </div>
+
+            </form>
+
+        </section>
+
+    {% endif %}
+
+</div>
+
+<script>
+
+    const campoFoto = document.querySelector('input[name="foto"]');
+    const contenedorVistaPrevia = document.getElementById('contenedorVistaPrevia');
+    const imagenVistaPrevia = document.getElementById('imagenVistaPrevia');
+    const botonQuitarFoto = document.getElementById('botonQuitarFoto');
+    const errorFotoCliente = document.getElementById('errorFotoCliente');
+
+    if (
+        campoFoto &&
+        contenedorVistaPrevia &&
+        imagenVistaPrevia &&
+        botonQuitarFoto
+    ) {
+
+        let urlImagen = null;
+
+        function limpiarVistaPrevia() {
+
+            if (urlImagen) {
+                URL.revokeObjectURL(urlImagen);
+                urlImagen = null;
+            }
+
+            imagenVistaPrevia.removeAttribute('src');
+            contenedorVistaPrevia.classList.add('hidden');
+
+        }
+
+        function mostrarErrorFoto(mensaje) {
+
+            if (errorFotoCliente) {
+                errorFotoCliente.textContent = mensaje;
+                errorFotoCliente.classList.remove('hidden');
+            }
+
+        }
+
+        function ocultarErrorFoto() {
+
+            if (errorFotoCliente) {
+                errorFotoCliente.textContent = '';
+                errorFotoCliente.classList.add('hidden');
+            }
+
+        }
+
+        campoFoto.addEventListener('change', function () {
+
+            limpiarVistaPrevia();
+            ocultarErrorFoto();
+
+            const archivo = campoFoto.files[0];
+
+            if (!archivo) {
+                return;
+            }
+
+            const formatosPermitidos = [
+                'image/jpeg',
+                'image/png',
+                'image/webp'
+            ];
+
+            if (!formatosPermitidos.includes(archivo.type)) {
+
+                campoFoto.value = '';
+
+                mostrarErrorFoto(
+                    'Solo puedes seleccionar imágenes JPG, PNG o WEBP.'
+                );
+
+                return;
+            }
+
+            if (archivo.size > 5 * 1024 * 1024) {
+
+                campoFoto.value = '';
+
+                mostrarErrorFoto(
+                    'La fotografía no puede superar 5 MB.'
+                );
+
+                return;
+            }
+
+            urlImagen = URL.createObjectURL(archivo);
+
+            imagenVistaPrevia.src = urlImagen;
+            contenedorVistaPrevia.classList.remove('hidden');
+
+        });
+
+        botonQuitarFoto.addEventListener('click', function () {
+
+            campoFoto.value = '';
+
+            limpiarVistaPrevia();
+            ocultarErrorFoto();
+
+        });
+
+        window.addEventListener('pagehide', function () {
+
+            if (urlImagen) {
+                URL.revokeObjectURL(urlImagen);
+                urlImagen = null;
+            }
+
+        });
+
+    }
+
+</script>
+
+{% endblock %}

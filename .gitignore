@@ -15,3 +15,6 @@ objetos_fotos/
 
 # Configuraciones de VS Code
 .vscode/
+
+# contraseña de correo
+.env

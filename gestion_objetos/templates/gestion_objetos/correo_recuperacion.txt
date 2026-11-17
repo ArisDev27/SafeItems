@@ -1,0 +1,12 @@
+
+Hola, {{ user.first_name }}.
+
+Recibimos una solicitud para recuperar tu contraseña de SafeItems.
+
+Para establecer una nueva contraseña, abre este enlace:
+
+{{ protocol }}://{{ domain }}{% url 'password_reset_confirm' uidb64=uid token=token %}
+
+Si no solicitaste este cambio, puedes ignorar el mensaje.
+
+Equipo SafeItems

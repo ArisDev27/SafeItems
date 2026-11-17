@@ -1,0 +1,176 @@
+{% extends 'gestion_objetos/base.html' %}
+
+{% block titulo_documento %}
+Reclamar objeto - SafeItems
+{% endblock %}
+
+{% block titulo_pagina %}
+Reclamar objeto
+{% endblock %}
+
+{% block contenido %}
+
+<div class="p-5 md:p-8 max-w-3xl w-full mx-auto space-y-6">
+
+    <a href="{% url 'detalle_objeto' objeto.id %}"
+       class="inline-flex items-center gap-2 text-sm font-semibold text-[#0B402B] hover:underline">
+        <i class="bi bi-arrow-left"></i>
+        Volver a los detalles
+    </a>
+
+    <div>
+        <h1 class="text-2xl md:text-3xl font-bold text-[#0B402B]">
+            Reclamar objeto
+        </h1>
+        <p class="text-sm text-gray-500 mt-2">
+            Confirma que conoces un detalle del objeto antes de enviar tu solicitud.
+        </p>
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="rounded-xl border px-4 py-3 text-sm
+                {% if message.tags == 'error' %}
+                    border-red-200 bg-red-50 text-red-700
+                {% elif message.tags == 'success' %}
+                    border-green-200 bg-green-50 text-green-800
+                {% else %}
+                    border-blue-200 bg-blue-50 text-blue-800
+                {% endif %}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <section class="bg-white border border-gray-200 rounded-3xl shadow-sm overflow-hidden">
+
+        <div class="p-5 md:p-7 bg-gradient-to-r from-[#E8F8EE] to-[#F3FCF6] border-b border-[#bce2c7]">
+            <h2 class="font-bold text-[#0B402B] text-lg">
+                Objeto que deseas reclamar
+            </h2>
+        </div>
+
+        <div class="p-5 md:p-7">
+            <div class="flex flex-col sm:flex-row items-start gap-5">
+                <div class="w-full sm:w-36 h-44 sm:h-36 shrink-0 rounded-xl overflow-hidden bg-[#E8F8EE] flex items-center justify-center">
+                    {% if objeto.foto %}
+                        <img src="{{ objeto.foto.url }}"
+                             alt="Fotografía de {{ objeto.titulo }}"
+                             class="w-full h-full object-cover">
+                    {% else %}
+                        <i class="bi bi-image text-4xl text-[#217351]"></i>
+                    {% endif %}
+                </div>
+
+                <div class="flex-1 space-y-2">
+                    <span class="inline-flex rounded-full bg-green-100 text-green-800 text-xs font-semibold px-3 py-1">
+                        Objeto encontrado
+                    </span>
+                    <h3 class="text-xl font-bold text-[#0B402B] break-words">{{ objeto.titulo }}</h3>
+                    <p class="text-sm text-gray-600">
+                        <i class="bi bi-tag mr-1 text-[#217351]"></i>
+                        {{ objeto.categoria|default:'Sin categoría' }}
+                    </p>
+                    <p class="text-sm text-gray-600">
+                        <i class="bi bi-geo-alt mr-1 text-[#217351]"></i>
+                        {{ objeto.lugar|default:'Lugar no indicado' }}
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    {% if solicitud_existente %}
+
+        <div class="bg-white border border-gray-200 rounded-2xl p-6 md:p-8 space-y-3">
+            <div class="w-14 h-14 rounded-full bg-[#E8F8EE] flex items-center justify-center">
+                <i class="bi bi-check-circle-fill text-2xl text-[#0B402B]"></i>
+            </div>
+            <h2 class="text-xl font-bold text-[#0B402B]">
+                Ya tienes una solicitud para este objeto
+            </h2>
+            <p class="text-sm text-gray-600">
+                Estado de tu solicitud: <strong>{{ solicitud_existente.get_estado_display }}</strong>.
+                No necesitas volver a enviarla.
+            </p>
+        </div>
+
+    {% elif aprobacion_en_curso %}
+
+        <div class="bg-white border border-blue-200 rounded-2xl p-6 md:p-8 space-y-3">
+            <h2 class="text-xl font-bold text-[#0B402B]">Reclamación en proceso de entrega</h2>
+            <p class="text-sm text-gray-600">
+                Este objeto ya tiene una solicitud aprobada. Por ahora no se aceptan nuevas reclamaciones.
+            </p>
+        </div>
+
+    {% else %}
+
+        <section class="bg-white border border-gray-200 rounded-3xl shadow-sm overflow-hidden">
+            <div class="px-6 py-5 bg-[#E8F8EE] border-b border-[#bce2c7]">
+                <h2 class="text-lg font-bold text-[#0B402B] flex items-center gap-2">
+                    <i class="bi bi-shield-lock"></i>
+                    Pregunta de seguridad
+                </h2>
+                <p class="text-sm text-[#217351] mt-1">
+                    La pregunta fue creada por la persona que encontró el objeto.
+                </p>
+            </div>
+
+            <div class="p-6 md:p-8 space-y-5">
+                <div class="rounded-xl bg-gray-50 border border-gray-200 p-4">
+                    <p class="text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">Pregunta</p>
+                    <p class="text-base font-semibold text-gray-800 break-words">{{ objeto.pregunta_seguridad }}</p>
+                </div>
+
+                <form method="post" class="space-y-5">
+                    {% csrf_token %}
+                    <input type="hidden" name="version_reporte" value="{{ version_reporte }}">
+
+                    <div class="space-y-2">
+                        <label for="respuesta" class="block font-semibold text-gray-700 text-sm">
+                            Tu respuesta <span class="text-red-600">*</span>
+                        </label>
+                        <input id="respuesta"
+                               name="respuesta"
+                               type="text"
+                               required
+                               maxlength="255"
+                               autocomplete="off"
+                               placeholder="Escribe tu respuesta"
+                               class="w-full px-4 py-3 rounded-xl border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-green-600">
+                        <p class="text-xs text-gray-500">
+                            La verificación es privada. En los reportes nuevos se ignoran las mayúsculas
+                            y los espacios adicionales, pero las palabras deben coincidir.
+                            La respuesta correcta no se muestra ni se envía al administrador.
+                        </p>
+                    </div>
+
+                    <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 flex items-start gap-3">
+                        <i class="bi bi-info-circle text-blue-700 mt-0.5"></i>
+                        <p class="text-sm text-blue-800">
+                            Responder correctamente no significa que el objeto se entregue de inmediato.
+                            La solicitud quedará pendiente de revisión por el administrador.
+                        </p>
+                    </div>
+
+                    <div class="flex flex-col-reverse sm:flex-row gap-3 justify-end">
+                        <a href="{% url 'detalle_objeto' objeto.id %}"
+                           class="px-6 py-3 text-center border border-gray-300 rounded-xl font-semibold text-gray-600 hover:bg-gray-100 transition">
+                            Volver
+                        </a>
+                        <button type="submit"
+                                class="px-6 py-3 rounded-xl bg-[#0B402B] hover:bg-[#135A3E] text-white font-bold transition">
+                            <i class="bi bi-send mr-1"></i>
+                            Enviar solicitud
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}

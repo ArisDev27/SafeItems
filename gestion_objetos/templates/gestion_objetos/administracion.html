@@ -1,0 +1,1022 @@
+{% load static %}
+
+<!DOCTYPE html>
+
+<html lang="es">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Administración | SafeItems</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <link rel="stylesheet"
+
+          href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+</head>
+
+<body class="bg-[#F3F4F6] min-h-screen font-sans text-gray-800">
+
+<div class="min-h-screen md:flex">
+
+    <!-- MENÚ ADMINISTRATIVO -->
+
+    <aside class="bg-[#0B402B] text-white md:w-64 md:min-h-screen shrink-0 p-5 md:p-6">
+
+        <div class="flex items-center justify-between md:block">
+
+            <div class="flex items-center gap-3 md:flex-col md:gap-4">
+
+                <img src="{% static 'img/logo.png' %}"
+
+                     alt="SafeItems"
+
+                     class="w-28 md:w-44 h-auto object-contain">
+
+                <span class="text-xs font-semibold tracking-wide uppercase text-green-100 md:text-center">
+
+                    Administración
+
+                </span>
+
+            </div>
+
+
+
+        </div>
+
+        <nav class="mt-7 space-y-2">
+
+            <a href="{% url 'panel_administrador' %}"
+
+               class="flex items-center gap-3 px-4 py-3 rounded-xl bg-white/10 hover:bg-white/20 transition text-sm font-semibold">
+
+                <i class="bi bi-grid-1x2-fill"></i>
+
+                Panel administrativo
+
+            </a>
+
+
+        </nav>
+
+
+
+    </aside>
+
+    <!-- CONTENIDO PRINCIPAL -->
+
+    <main class="flex-1 min-w-0">
+
+        <header class="bg-white border-b border-gray-200 px-5 md:px-8 py-5 flex flex-col sm:flex-row sm:justify-between gap-2">
+
+            <div>
+
+                <h1 class="text-xl md:text-2xl font-bold text-[#0B402B]">
+
+                    {% if pantalla == 'panel' %}
+
+                        Panel del administrador
+
+                    {% else %}
+
+                        Revisar reclamación
+
+                    {% endif %}
+
+                </h1>
+
+                <p class="text-sm text-gray-500">
+
+                    SafeItems · Gestión autorizada
+
+                </p>
+
+            </div>
+
+            <!-- Usuario administrador: foto, nombre y menú desplegable -->
+            <details class="relative group self-start sm:self-center">
+
+                <summary class="flex items-center gap-3 cursor-pointer list-none rounded-xl px-2 py-1 hover:bg-gray-100 transition [&::-webkit-details-marker]:hidden"
+                         aria-label="Opciones de la cuenta del administrador">
+
+                    <div class="w-10 h-10 shrink-0 rounded-full bg-[#0B402B] text-white flex items-center justify-center overflow-hidden font-bold">
+                        {% if request.user.perfilusuario.foto_perfil %}
+                            <img src="{{ request.user.perfilusuario.foto_perfil.url }}"
+                                 alt="Foto de perfil"
+                                 class="w-full h-full object-cover">
+                        {% else %}
+                            {{ request.user.first_name|default:request.user.username|first|upper }}
+                        {% endif %}
+                    </div>
+
+                    <div class="hidden sm:flex flex-col text-left min-w-0">
+                        <span class="text-sm font-semibold text-gray-800 leading-tight max-w-56 truncate">
+                            {{ request.user.first_name|default:request.user.username|truncatewords:1 }}
+                        </span>
+                        <span class="text-[11px] text-gray-500">Administrador</span>
+                    </div>
+
+                    <i class="bi bi-chevron-down text-xs text-gray-500 group-open:rotate-180 transition-transform"></i>
+                </summary>
+
+                <div class="absolute right-0 top-full mt-2 w-56 rounded-xl bg-white border border-gray-200 shadow-xl p-2 z-50">
+                    <button type="button"
+                            onclick="document.getElementById('modalPerfilAdmin').showModal()"
+                            class="w-full flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-[#E8F8EE] hover:text-[#0B402B] rounded-lg text-left transition">
+                        <i class="bi bi-person-circle text-lg"></i>
+                        Mi perfil
+                    </button>
+
+                    <div class="border-t border-gray-100 my-1"></div>
+
+                    <form method="post" action="{% url 'logout' %}">
+                        {% csrf_token %}
+                        <button type="submit"
+                                class="w-full flex items-center gap-3 px-4 py-3 text-sm text-red-600 hover:bg-red-50 rounded-lg text-left transition">
+                            <i class="bi bi-box-arrow-right text-lg"></i>
+                            Cerrar sesión
+                        </button>
+                    </form>
+                </div>
+
+            </details>
+
+        </header>
+
+        <!-- Perfil de solo lectura: no abre las pantallas de estudiantes -->
+        <dialog id="modalPerfilAdmin"
+                aria-labelledby="tituloPerfilAdmin"
+                class="w-[92vw] max-w-md rounded-2xl bg-white p-0 shadow-2xl backdrop:bg-black/60">
+
+            <div class="bg-[#0B402B] text-white px-6 py-5 flex items-center justify-between gap-3">
+                <h2 id="tituloPerfilAdmin" class="font-bold text-lg">Mi perfil de administrador</h2>
+                <button type="button"
+                        aria-label="Cerrar perfil"
+                        onclick="document.getElementById('modalPerfilAdmin').close()"
+                        class="rounded-lg p-2 hover:bg-white/10 transition">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+
+            <div class="p-6 space-y-4">
+                <div class="flex flex-col items-center gap-2">
+                    <div class="w-20 h-20 rounded-full bg-[#0B402B] text-white font-bold text-3xl overflow-hidden flex items-center justify-center">
+                        {% if request.user.perfilusuario.foto_perfil %}
+                            <img src="{{ request.user.perfilusuario.foto_perfil.url }}"
+                                 alt="Foto de perfil"
+                                 class="w-full h-full object-cover">
+                        {% else %}
+                            {{ request.user.first_name|default:request.user.username|first|upper }}
+                        {% endif %}
+                    </div>
+                    <p class="font-bold text-[#0B402B] text-center break-words">
+                        {{ request.user.get_full_name|default:request.user.username }}
+                    </p>
+                    <p class="text-sm text-gray-500">Administrador de SafeItems</p>
+                </div>
+
+                <div class="border-t border-gray-100 pt-4 space-y-3 text-sm">
+                    <p class="break-words"><span class="font-semibold text-gray-600">Usuario:</span>
+                        {{ request.user.username }}</p>
+                    <p class="break-words"><span class="font-semibold text-gray-600">Correo:</span>
+                        {{ request.user.email|default:'No registrado' }}</p>
+                    <p><span class="font-semibold text-gray-600">Teléfono:</span>
+                        {{ request.user.perfilusuario.telefono|default:'No registrado' }}</p>
+                </div>
+
+                <button type="button"
+                        onclick="document.getElementById('modalPerfilAdmin').close()"
+                        class="w-full py-3 rounded-xl bg-[#0B402B] hover:bg-[#135A3E] text-white text-sm font-semibold transition">
+                    Cerrar
+                </button>
+            </div>
+        </dialog>
+
+        <div class="max-w-6xl mx-auto px-4 py-6 md:px-8 md:py-8 space-y-6">
+
+            <!-- MENSAJES -->
+
+            {% if messages %}
+
+                {% for message in messages %}
+
+                    <div role="status"
+
+                         class="rounded-xl border px-4 py-3 text-sm
+
+                         {% if message.tags == 'error' %}
+
+                             bg-red-50 border-red-200 text-red-800
+
+                         {% else %}
+
+                             bg-green-50 border-green-200 text-green-900
+
+                         {% endif %}">
+
+                        {{ message }}
+
+                    </div>
+
+                {% endfor %}
+
+            {% endif %}
+
+            <!-- PANTALLA PRINCIPAL DEL ADMINISTRADOR -->
+
+            {% if pantalla == 'panel' %}
+
+                <!-- ESTADÍSTICAS -->
+
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+
+                    <div class="bg-white rounded-2xl border p-4 md:p-5">
+
+                        <p class="text-xs md:text-sm text-gray-500">
+
+                            Pendientes
+
+                        </p>
+
+                        <p class="text-3xl font-bold text-amber-700 mt-2">
+
+                            {{ total_pendientes }}
+
+                        </p>
+
+                    </div>
+
+                    <div class="bg-white rounded-2xl border p-4 md:p-5">
+
+                        <p class="text-xs md:text-sm text-gray-500">
+
+                            Aprobadas
+
+                        </p>
+
+                        <p class="text-3xl font-bold text-[#0B402B] mt-2">
+
+                            {{ total_aprobadas }}
+
+                        </p>
+
+                    </div>
+
+                    <div class="bg-white rounded-2xl border p-4 md:p-5">
+
+                        <p class="text-xs md:text-sm text-gray-500">
+
+                            Entregadas
+
+                        </p>
+
+                        <p class="text-3xl font-bold text-blue-700 mt-2">
+
+                            {{ total_entregadas }}
+
+                        </p>
+
+                    </div>
+
+                    <div class="bg-white rounded-2xl border p-4 md:p-5">
+
+                        <p class="text-xs md:text-sm text-gray-500">
+
+                            Reportes activos
+
+                        </p>
+
+                        <p class="text-3xl font-bold text-gray-800 mt-2">
+
+                            {{ total_reportes_activos }}
+
+                        </p>
+
+                    </div>
+
+                </div>
+
+                <!-- SOLICITUDES -->
+
+                <section class="bg-white rounded-2xl border border-gray-200 p-5 md:p-6 shadow-sm space-y-5">
+
+                    <div>
+
+                        <h2 class="text-lg font-bold text-[#0B402B]">
+
+                            Solicitudes de reclamación
+
+                        </h2>
+
+                        <p class="text-sm text-gray-500 mt-1">
+
+                            Revisa y resuelve las solicitudes.
+
+                            Las entregas se implementarán en la siguiente etapa.
+
+                        </p>
+
+                    </div>
+
+                    <!-- FILTROS -->
+
+                    <form method="get"
+
+                          class="grid grid-cols-1 sm:grid-cols-[1fr_auto_auto] gap-3">
+
+                        <input name="q"
+
+                               value="{{ busqueda }}"
+
+                               placeholder="Buscar objeto o estudiante"
+
+                               aria-label="Buscar reclamaciones"
+
+                               class="border border-gray-300 rounded-xl px-4 py-3 text-sm min-w-0">
+
+                        <select name="estado"
+
+                                aria-label="Filtrar por estado"
+
+                                class="border border-gray-300 rounded-xl px-4 py-3 text-sm">
+
+                            <option value="PENDIENTE"
+
+                                {% if estado == 'PENDIENTE' %}selected{% endif %}>
+
+                                Pendientes
+
+                            </option>
+
+                            <option value="APROBADA"
+
+                                {% if estado == 'APROBADA' %}selected{% endif %}>
+
+                                Aprobadas
+
+                            </option>
+
+                            <option value="RECHAZADA"
+
+                                {% if estado == 'RECHAZADA' %}selected{% endif %}>
+
+                                Rechazadas
+
+                            </option>
+
+                            <option value="ENTREGADA"
+
+                                {% if estado == 'ENTREGADA' %}selected{% endif %}>
+
+                                Entregadas
+
+                            </option>
+
+                            <option value="TODAS"
+
+                                {% if estado == 'TODAS' %}selected{% endif %}>
+
+                                Todas
+
+                            </option>
+
+                        </select>
+
+                        <button type="submit"
+
+                                class="bg-[#0B402B] text-white font-semibold px-5 py-3 rounded-xl hover:bg-[#135A3E] transition">
+
+                            Filtrar
+
+                        </button>
+
+                    </form>
+
+                    <!-- LISTADO DE RECLAMACIONES -->
+
+                    <div class="space-y-3">
+
+                        {% for solicitud in page_obj %}
+
+                            <article class="border border-gray-200 rounded-xl p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+
+                                <div class="min-w-0">
+
+                                    <div class="flex flex-wrap gap-2 items-center mb-2">
+
+                                        <span class="font-bold text-[#0B402B] break-words">
+
+                                            {{ solicitud.objeto.titulo }}
+
+                                        </span>
+
+                                        <span class="text-xs rounded-full px-3 py-1 font-semibold
+
+                                            {% if solicitud.estado == 'PENDIENTE' %}
+
+                                                bg-amber-100 text-amber-800
+
+                                            {% elif solicitud.estado == 'APROBADA' %}
+
+                                                bg-green-100 text-green-800
+
+                                            {% elif solicitud.estado == 'RECHAZADA' %}
+
+                                                bg-red-100 text-red-700
+
+                                            {% else %}
+
+                                                bg-blue-100 text-blue-800
+
+                                            {% endif %}">
+
+                                            {{ solicitud.get_estado_display }}
+
+                                        </span>
+
+                                    </div>
+
+                                    <p class="text-sm text-gray-600">
+
+                                        Solicitante:
+
+                                        {{ solicitud.solicitante.get_full_name|default:solicitud.solicitante.username }}
+
+                                    </p>
+
+                                    <p class="text-xs text-gray-400 mt-1">
+
+                                        Solicitud #{{ solicitud.id }} ·
+
+                                        {{ solicitud.fecha_solicitud|date:"d/m/Y H:i" }}
+
+                                    </p>
+
+                                </div>
+
+                                <a href="{% url 'detalle_reclamacion_admin' solicitud.id %}"
+
+                                   class="shrink-0 text-center bg-[#E8F8EE] text-[#0B402B] font-semibold text-sm px-5 py-3 rounded-xl hover:bg-[#D0ECD7] transition">
+
+                                    Revisar solicitud
+
+                                </a>
+
+                            </article>
+
+                        {% empty %}
+
+                            <div class="bg-gray-50 rounded-xl text-center py-12 px-4">
+
+                                <i class="bi bi-inbox text-3xl text-gray-400"></i>
+
+                                <p class="text-gray-500 text-sm mt-2">
+
+                                    No hay solicitudes con esos filtros.
+
+                                </p>
+
+                            </div>
+
+                        {% endfor %}
+
+                    </div>
+
+                    <!-- PAGINACIÓN -->
+
+                    {% if page_obj.has_other_pages %}
+
+                        <div class="flex justify-between items-center gap-3 text-sm pt-3">
+
+                            {% if page_obj.has_previous %}
+
+                                <a class="text-[#0B402B] font-semibold"
+
+                                   href="?estado={{ estado }}&amp;q={{ busqueda|urlencode }}&amp;page={{ page_obj.previous_page_number }}">
+
+                                    Anterior
+
+                                </a>
+
+                            {% else %}
+
+                                <span class="text-gray-400">Anterior</span>
+
+                            {% endif %}
+
+                            <span class="text-gray-500">
+
+                                Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
+
+                            </span>
+
+                            {% if page_obj.has_next %}
+
+                                <a class="text-[#0B402B] font-semibold"
+
+                                   href="?estado={{ estado }}&amp;q={{ busqueda|urlencode }}&amp;page={{ page_obj.next_page_number }}">
+
+                                    Siguiente
+
+                                </a>
+
+                            {% else %}
+
+                                <span class="text-gray-400">Siguiente</span>
+
+                            {% endif %}
+
+                        </div>
+
+                    {% endif %}
+
+                </section>
+
+            {% else %}
+
+                <!-- DETALLE DE UNA RECLAMACIÓN -->
+
+                <a href="{% url 'panel_administrador' %}"
+
+                   class="inline-flex items-center gap-2 text-[#0B402B] text-sm font-semibold hover:underline">
+
+                    <i class="bi bi-arrow-left"></i>
+
+                    Volver al panel
+
+                </a>
+
+                <section class="bg-white rounded-2xl border border-gray-200 shadow-sm p-5 md:p-7 space-y-5">
+
+                    <div class="flex flex-wrap justify-between gap-3 items-start">
+
+                        <div>
+
+                            <h2 class="text-xl font-bold text-[#0B402B]">
+
+                                Reclamación #{{ solicitud.id }}
+
+                            </h2>
+
+                            <p class="text-sm text-gray-500 mt-1">
+
+                                {{ solicitud.fecha_solicitud|date:"d/m/Y H:i" }}
+
+                            </p>
+
+                        </div>
+
+                        <span class="px-3 py-2 rounded-full text-sm font-semibold
+
+                            {% if solicitud.estado == 'PENDIENTE' %}
+
+                                bg-amber-100 text-amber-800
+
+                            {% elif solicitud.estado == 'APROBADA' %}
+
+                                bg-green-100 text-green-800
+
+                            {% elif solicitud.estado == 'RECHAZADA' %}
+
+                                bg-red-100 text-red-700
+
+                            {% else %}
+
+                                bg-blue-100 text-blue-800
+
+                            {% endif %}">
+
+                            {{ solicitud.get_estado_display }}
+
+                        </span>
+
+                    </div>
+
+                    <!-- DATOS DEL OBJETO Y LOS ESTUDIANTES -->
+
+                    <div class="grid md:grid-cols-[180px_1fr] gap-5">
+
+                        <div class="bg-[#E8F8EE] rounded-xl h-44 flex items-center justify-center overflow-hidden">
+
+                            {% if solicitud.objeto.foto %}
+
+                                <img src="{{ solicitud.objeto.foto.url }}"
+
+                                     alt="Fotografía del objeto"
+
+                                     class="w-full h-full object-contain">
+
+                            {% else %}
+
+                                <i class="bi bi-image text-5xl text-[#217351]"></i>
+
+                            {% endif %}
+
+                        </div>
+
+                        <div class="space-y-2 text-sm">
+
+                            <p>
+
+                                <span class="text-gray-500">Objeto:</span>
+
+                                <strong>{{ solicitud.objeto.titulo }}</strong>
+
+                            </p>
+
+                            <p>
+
+                                <span class="text-gray-500">Categoría:</span>
+
+                                {{ solicitud.objeto.categoria }}
+
+                            </p>
+
+                            <p>
+
+                                <span class="text-gray-500">Color:</span>
+
+                                {{ solicitud.objeto.color }}
+
+                            </p>
+
+                            <p>
+
+                                <span class="text-gray-500">Marca:</span>
+
+                                {{ solicitud.objeto.marca|default:"No indicada" }}
+
+                            </p>
+
+                            <p>
+
+                                <span class="text-gray-500">Lugar:</span>
+
+                                {{ solicitud.objeto.lugar }}
+
+                            </p>
+
+                            <p>
+
+                                <span class="text-gray-500">Publicó:</span>
+
+                                {{ solicitud.objeto.reportado_por.get_full_name|default:solicitud.objeto.reportado_por.username }}
+
+                            </p>
+
+                            <p>
+
+                                <span class="text-gray-500">Solicita:</span>
+
+                                {{ solicitud.solicitante.get_full_name|default:solicitud.solicitante.username }}
+
+                            </p>
+
+                            <p>
+
+                                <span class="text-gray-500">Pregunta de seguridad:</span>
+
+                                {% if solicitud.respuesta_verificada %}
+
+                                    <span class="text-green-700 font-semibold">
+
+                                        Respuesta verificada
+
+                                    </span>
+
+                                {% else %}
+
+                                    <span class="text-red-700 font-semibold">
+
+                                        Sin verificar
+
+                                    </span>
+
+                                {% endif %}
+
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                    {% if solicitud.objeto.descripcion %}
+
+                        <div class="rounded-xl bg-gray-50 p-4">
+
+                            <h3 class="font-semibold text-sm text-gray-700 mb-1">
+
+                                Descripción del objeto
+
+                            </h3>
+
+                            <p class="text-sm text-gray-600 whitespace-pre-line break-words">
+
+                                {{ solicitud.objeto.descripcion }}
+
+                            </p>
+
+                        </div>
+
+                    {% endif %}
+
+                    {% if solicitud.observaciones_admin %}
+
+                        <div class="rounded-xl bg-gray-50 p-4">
+
+                            <h3 class="font-semibold text-sm text-gray-700 mb-1">
+
+                                Observaciones del administrador
+
+                            </h3>
+
+                            <p class="text-sm text-gray-600 whitespace-pre-line break-words">
+
+                                {{ solicitud.observaciones_admin }}
+
+                            </p>
+
+                        </div>
+
+                    {% endif %}
+
+                </section>
+
+                <!-- DECISIÓN DEL ADMINISTRADOR -->
+
+                {% if puede_rechazar %}
+
+                    <section class="bg-white rounded-2xl border border-gray-200 shadow-sm p-5 md:p-7 space-y-4">
+
+                        <h3 class="font-bold text-lg text-[#0B402B]">
+
+                            Resolver reclamación
+
+                        </h3>
+
+                        <p class="text-sm text-gray-600">
+
+                            Aprobar reserva el objeto para esta persona.
+
+                            Si hay otras solicitudes pendientes del mismo objeto,
+
+                            se rechazarán y se avisará a sus solicitantes.
+
+                            Rechazar exige una explicación.
+
+                        </p>
+
+                        {% if not puede_aprobar %}
+
+                            <p class="text-sm bg-amber-50 border border-amber-200 rounded-xl p-3 text-amber-800">
+
+                                Esta solicitud no puede aprobarse:
+
+                                verifica el estado del objeto,
+
+                                la pregunta de seguridad y que no exista otra reclamación aprobada.
+
+                            </p>
+
+                        {% endif %}
+
+                        <form action="{% url 'resolver_reclamacion_admin' solicitud.id %}"
+
+                              method="post"
+
+                              class="space-y-4">
+
+                            {% csrf_token %}
+
+                            <label for="observaciones"
+
+                                   class="block text-sm font-semibold text-gray-700">
+
+                                Observaciones o motivo del rechazo
+
+                            </label>
+
+                            <textarea id="observaciones"
+
+                                      name="observaciones"
+
+                                      rows="4"
+
+                                      maxlength="1000"
+
+                                      placeholder="Escribe las observaciones. Si rechazas, el motivo es obligatorio."
+
+                                      class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm"></textarea>
+
+                            <div class="flex flex-col sm:flex-row gap-3">
+
+                                {% if puede_aprobar %}
+
+                                    <button type="submit"
+
+                                            name="accion"
+
+                                            value="aprobar"
+
+                                            class="bg-[#0B402B] hover:bg-[#135A3E] text-white rounded-xl px-5 py-3 font-semibold text-sm">
+
+                                        <i class="bi bi-check-circle mr-1"></i>
+
+                                        Aprobar reclamación
+
+                                    </button>
+
+                                {% endif %}
+
+                                <button type="submit"
+
+                                        name="accion"
+
+                                        value="rechazar"
+
+                                        class="bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 rounded-xl px-5 py-3 font-semibold text-sm">
+
+                                    <i class="bi bi-x-circle mr-1"></i>
+
+                                    Rechazar reclamación
+
+                                </button>
+
+                            </div>
+
+                        </form>
+
+                    </section>
+
+                {% else %}
+
+                    <div class="bg-gray-100 border border-gray-200 rounded-xl p-4 text-sm text-gray-600">
+
+                        Esta solicitud ya está resuelta.
+
+                        Para evitar cambios en el historial, no puede aprobarse
+
+                        ni rechazarse nuevamente.
+
+                    </div>
+
+                {% endif %}
+
+                <!-- GESTIÓN DE LA ENTREGA -->
+                {% if solicitud.estado == 'APROBADA' %}
+
+                    <section class="bg-white rounded-2xl border border-gray-200 shadow-sm p-5 md:p-7 space-y-4">
+
+                        <div class="flex items-center gap-3">
+
+                            <div class="w-11 h-11 bg-[#E8F8EE] rounded-xl flex items-center justify-center">
+                                <i class="bi bi-key text-xl text-[#0B402B]"></i>
+                            </div>
+
+                            <div>
+                                <h3 class="font-bold text-lg text-[#0B402B]">
+                                    Confirmar entrega del objeto
+                                </h3>
+
+                                <p class="text-sm text-gray-500">
+                                    Valida el código presentado por el estudiante.
+                                </p>
+                            </div>
+
+                        </div>
+
+                        {% if solicitud.objeto.codigo_entrega %}
+
+                            <div class="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3">
+
+                                <p class="text-sm text-amber-900">
+                                    <i class="bi bi-exclamation-triangle mr-1"></i>
+                                    Confirma primero que el objeto se está entregando
+                                    físicamente a la persona autorizada.
+                                </p>
+
+                            </div>
+
+                            <form method="post"
+                                action="{% url 'confirmar_entrega_admin' solicitud.id %}"
+                                class="space-y-4">
+
+                                {% csrf_token %}
+
+                                <div>
+
+                                    <label for="codigo_entrega"
+                                        class="block font-semibold text-sm text-gray-700 mb-2">
+                                        Código de entrega
+                                    </label>
+
+                                    <input
+                                        id="codigo_entrega"
+                                        name="codigo_entrega"
+                                        type="text"
+                                        maxlength="10"
+                                        minlength="10"
+                                        pattern="[A-Za-z2-9]{10}"
+                                        autocomplete="off"
+                                        autocapitalize="characters"
+                                        placeholder="Ingresa los 10 caracteres"
+                                        required
+                                        class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm uppercase tracking-widest font-semibold focus:outline-none focus:ring-2 focus:ring-green-700">
+
+                                </div>
+
+                                <button type="submit"
+                                        onclick="return confirm('¿Ya comprobaste la entrega física del objeto? Esta acción cerrará el caso definitivamente.')"
+                                        class="inline-flex items-center justify-center gap-2 bg-[#0B402B] hover:bg-[#135A3E] text-white font-semibold text-sm px-5 py-3 rounded-xl transition">
+
+                                    <i class="bi bi-check-circle"></i>
+                                    Validar código y confirmar entrega
+
+                                </button>
+
+                            </form>
+
+                        {% else %}
+
+                            <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 space-y-3">
+
+                                <p class="text-sm text-amber-900">
+                                    Esta reclamación fue aprobada antes de implementar
+                                    los códigos de entrega. Debes generar su código.
+                                </p>
+
+                                <form method="post"
+                                    action="{% url 'generar_codigo_aprobado_admin' solicitud.id %}">
+
+                                    {% csrf_token %}
+
+                                    <button type="submit"
+                                            class="bg-[#0B402B] text-white font-semibold text-sm px-5 py-3 rounded-xl hover:bg-[#135A3E] transition">
+
+                                        <i class="bi bi-key-fill mr-1"></i>
+                                        Generar código de entrega
+
+                                    </button>
+
+                                </form>
+
+                            </div>
+
+                        {% endif %}
+
+                    </section>
+
+                {% elif solicitud.estado == 'ENTREGADA' %}
+
+                    <section class="bg-green-50 border border-green-200 rounded-2xl p-5 md:p-7">
+
+                        <div class="flex items-start gap-3">
+
+                            <i class="bi bi-check-circle-fill text-green-700 text-2xl"></i>
+
+                            <div>
+
+                                <h3 class="font-bold text-green-900 text-lg">
+                                    Entrega completada
+                                </h3>
+
+                                <p class="text-sm text-green-800 mt-1">
+                                    El objeto fue entregado correctamente
+                                    y el código ya no puede utilizarse.
+                                </p>
+
+                                {% if solicitud.fecha_entrega %}
+
+                                    <p class="text-sm text-green-700 mt-2">
+                                        Fecha de entrega:
+                                        {{ solicitud.fecha_entrega|date:"d/m/Y H:i" }}
+                                    </p>
+
+                                {% endif %}
+
+                            </div>
+
+                        </div>
+
+                    </section>
+
+                {% endif %}
+
+
+            {% endif %}
+
+        </div>
+
+    </main>
+
+</div>
+
+</body>
+
+</html>

@@ -1,0 +1,397 @@
+
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>{% block titulo_documento %}SafeItems{% endblock %}</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    {% block extra_head %}{% endblock %}
+</head>
+
+<body class="bg-[#f3f4f6] font-sans min-h-screen md:h-screen flex flex-col md:flex-row md:overflow-hidden">
+
+    <!-- MENÚ LATERAL COMPARTIDO -->
+    <aside class="hidden md:flex w-64 shrink-0 bg-[#0B402B] text-white flex-col justify-between p-6 shadow-xl h-screen">
+
+        <div>
+
+            <!-- Universidad -->
+            <div class="mb-8 border-b border-white/10 pb-6 flex justify-center">
+                <img
+                    src="{% static 'img/simon_bolivar.png' %}"
+                    alt="Universidad Simón Bolívar"
+                    class="w-40 h-auto object-contain brightness-0 invert"
+                >
+            </div>
+
+            <!-- LOGO SAFEITEMS -->
+             <div class="mb-8 flex justify-center">
+                <img
+                    src="{% static 'img/logo.png' %}"
+                    alt="SafeItems"
+                    class="w-48 h-auto object-contain drop-shadow-[0_0_12px_rgba(255,255,255,0.65)]"
+                >
+             </div>
+
+            <!-- Navegación -->
+            <nav class="space-y-1.5">
+
+                <!-- Inicio -->
+                <a href="{% url 'inicio' %}"
+                   class="flex items-center gap-3 px-4 py-3.5 rounded-xl transition
+                   {% if request.resolver_match.url_name == 'inicio' %}
+                       bg-white/10 text-white font-medium
+                   {% else %}
+                       text-gray-300 hover:bg-white/5 hover:text-white
+                   {% endif %}">
+
+                    <i class="bi bi-house-door-fill text-lg"></i>
+                    Inicio
+
+                </a>
+
+                <!-- Buscar objeto -->
+                <a href="{% url 'buscar_objeto' %}"
+                   class="flex items-center gap-3 px-4 py-3.5 text-gray-300 hover:bg-white/5 rounded-xl hover:text-white transition">
+
+                    <i class="bi bi-search text-lg"></i>
+                    Buscar objeto
+
+                </a>
+
+                <!-- Reportar objeto -->
+                <a href="{% url 'reportar_perdido' %}"
+                   class="flex items-center gap-3 px-4 py-3.5 text-gray-300 hover:bg-white/5 rounded-xl hover:text-white transition">
+
+                    <i class="bi bi-plus-square text-lg"></i>
+                    Reportar objeto
+
+                </a>
+
+                <!-- Mis reportes -->
+                <a href="{% url 'mis_reportes' %}"
+                   class="flex items-center justify-between gap-3 px-4 py-3.5 text-gray-300 hover:bg-white/5 rounded-xl hover:text-white transition">
+
+                    <span class="flex items-center gap-3">
+                        <i class="bi bi-envelope text-lg"></i>
+                        Mis reportes
+                    </span>
+
+                </a>
+
+            </nav>
+
+        </div>
+
+        <!-- Frase inferior -->
+        <div class="mt-auto pt-6 text-center">
+
+            <p class="text-[11px] italic text-gray-400 font-light">
+                "Encuentra. Devuelve. Conecta."
+            </p>
+
+        </div>
+
+    </aside>
+
+
+    <!-- ÁREA PRINCIPAL -->
+    <main class="flex-1 min-w-0 md:h-screen md:overflow-y-auto">
+
+        <!-- BARRA SUPERIOR COMPARTIDA -->
+        <header class="bg-white border-b border-gray-200 px-5 md:px-8 py-4 flex items-center justify-between shadow-sm sticky top-0 z-30">
+
+            <!-- Título dinámico -->
+            <h2 class="text-xl font-bold text-gray-800">
+                {% block titulo_pagina %}Inicio{% endblock %}
+            </h2>
+
+            <div class="flex items-center gap-4 md:gap-6">
+
+                <!-- Puntos -->
+                <div class="hidden sm:flex items-center gap-2 bg-[#FFF9E6] border border-[#FDE047] px-3 py-1.5 rounded-full"
+                     title="Tu nivel actual de colaboración">
+
+                    <i class="bi bi-star-fill text-[#EAB308] text-sm"></i>
+
+                    <div class="flex flex-col">
+
+                        <span class="text-[#854D0E] font-bold text-xs leading-none">
+                            {{ user.perfilusuario.puntos_colaboracion|default:"0" }} pts
+                        </span>
+
+                        <span class="text-[#A16207] text-[9px] font-semibold uppercase mt-0.5">
+                            {{ user.perfilusuario.nivel|default:"Novato" }}
+                        </span>
+
+                    </div>
+
+                </div>
+
+                <!-- Notificaciones -->
+                <details class="relative group">
+
+                    <summary
+                        aria-label="Abrir notificaciones"
+                        class="relative w-10 h-10 flex items-center justify-center rounded-full cursor-pointer list-none text-gray-500 hover:text-[#0B402B] hover:bg-[#E8F8EE] transition [&::-webkit-details-marker]:hidden">
+
+                        <i class="bi bi-bell text-xl"></i>
+
+                        {% if notificaciones_sin_leer > 0 %}
+
+                            <span class="absolute -top-1 -right-1 min-w-5 h-5 px-1 flex items-center justify-center rounded-full bg-red-500 text-white text-[10px] font-bold">
+
+                                {% if notificaciones_sin_leer > 99 %}
+                                    99+
+                                {% else %}
+                                    {{ notificaciones_sin_leer }}
+                                {% endif %}
+
+                            </span>
+
+                        {% endif %}
+
+                    </summary>
+
+                    <div class="fixed top-20 left-4 right-4 sm:absolute sm:top-full sm:left-auto sm:right-0 sm:mt-3 sm:w-96 bg-white border border-gray-200 rounded-2xl shadow-2xl z-50 overflow-hidden">
+
+                        <div class="px-5 py-4 border-b border-gray-100 bg-[#E8F8EE]">
+
+                            <div class="flex items-center justify-between gap-3">
+
+                                <h3 class="text-base font-bold text-[#0B402B]">
+                                    <i class="bi bi-bell-fill mr-2"></i>
+                                    Notificaciones
+                                </h3>
+
+                                {% if notificaciones_sin_leer > 0 %}
+
+                                    <span class="text-xs font-semibold text-[#0B402B] bg-white px-3 py-1 rounded-full">
+                                        {{ notificaciones_sin_leer }} sin leer
+                                    </span>
+
+                                {% endif %}
+
+                            </div>
+
+                        </div>
+
+                        <div class="max-h-[65vh] overflow-y-auto">
+
+                            {% for notificacion in notificaciones_recientes %}
+
+                                <form
+                                    method="post"
+                                    action="{% url 'abrir_notificacion' notificacion.id %}">
+
+                                    {% csrf_token %}
+
+                                    <input
+                                        type="hidden"
+                                        name="siguiente"
+                                        value="{{ request.get_full_path }}">
+
+                                    <button
+                                        type="submit"
+                                        class="w-full text-left px-5 py-4 border-b border-gray-100 hover:bg-[#F3FCF6] transition
+                                        {% if notificacion.leida %}
+                                            bg-white
+                                        {% else %}
+                                            bg-[#F0FAF3]
+                                        {% endif %}">
+
+                                        <div class="flex items-start gap-3">
+
+                                            <div class="w-9 h-9 shrink-0 rounded-full bg-[#D0ECD7] flex items-center justify-center">
+
+                                                {% if notificacion.tipo == 'HALLAZGO' %}
+
+                                                    <i class="bi bi-box-seam text-[#0B402B]"></i>
+
+                                                {% elif notificacion.tipo == 'RECLAMACION' %}
+
+                                                    <i class="bi bi-shield-check text-[#0B402B]"></i>
+
+                                                {% elif notificacion.tipo == 'ENTREGA' %}
+
+                                                    <i class="bi bi-check-circle text-[#0B402B]"></i>
+
+                                                {% elif notificacion.tipo == 'PUNTOS' %}
+
+                                                    <i class="bi bi-star-fill text-[#0B402B]"></i>
+
+                                                {% elif notificacion.tipo == 'COINCIDENCIA' %}
+
+                                                    <i class="bi bi-search text-[#0B402B]"></i>
+
+                                                {% else %}
+
+                                                    <i class="bi bi-info-circle text-[#0B402B]"></i>
+
+                                                {% endif %}
+
+                                            </div>
+
+                                            <div class="flex-1 min-w-0">
+
+                                                <div class="flex items-start justify-between gap-2">
+
+                                                    <p class="text-sm font-bold text-gray-800 break-words">
+                                                        {{ notificacion.titulo }}
+                                                    </p>
+
+                                                    {% if not notificacion.leida %}
+
+                                                        <span class="w-2 h-2 shrink-0 mt-1 rounded-full bg-green-600"></span>
+
+                                                    {% endif %}
+
+                                                </div>
+
+                                                <p class="text-xs text-gray-600 mt-1 break-words">
+                                                    {{ notificacion.mensaje }}
+                                                </p>
+
+                                                <div class="flex items-center justify-between gap-2 mt-2">
+
+                                                    <span class="text-[11px] text-gray-400">
+                                                        {{ notificacion.fecha_creacion|date:"d/m/Y H:i" }}
+                                                    </span>
+
+                                                    <span class="text-[11px] font-semibold text-[#217351]">
+                                                        {% if notificacion.url %}
+                                                            Ver detalles
+                                                        {% elif not notificacion.leida %}
+                                                            Marcar como leída
+                                                        {% endif %}
+                                                    </span>
+
+                                                </div>
+
+                                            </div>
+
+                                        </div>
+
+                                    </button>
+
+                                </form>
+
+                            {% empty %}
+
+                                <div class="px-6 py-10 text-center">
+
+                                    <i class="bi bi-bell-slash text-4xl text-gray-300"></i>
+
+                                    <h4 class="text-sm font-bold text-gray-700 mt-3">
+                                        No tienes notificaciones
+                                    </h4>
+
+                                    <p class="text-xs text-gray-500 mt-2">
+                                        Aquí aparecerán las novedades de tus reportes y reclamaciones.
+                                    </p>
+
+                                </div>
+
+                            {% endfor %}
+
+                        </div>
+
+                    </div>
+
+                </details>
+
+                <!-- Menú del estudiante -->
+                <details class="relative border-l border-gray-200 pl-4 md:pl-6">
+
+                    <summary class="flex items-center gap-3 cursor-pointer list-none [&::-webkit-details-marker]:hidden">
+
+                        <!-- Avatar -->
+                        <div class="w-9 h-9 rounded-full bg-[#0B402B] flex items-center justify-center text-white font-bold text-sm overflow-hidden shrink-0">
+
+                            {% if user.perfilusuario.foto_perfil %}
+
+                                <img
+                                    src="{{ user.perfilusuario.foto_perfil.url }}"
+                                    alt="Foto de perfil"
+                                    class="w-full h-full object-cover"
+                                >
+
+                            {% else %}
+
+                                {{ user.first_name|default:user.username|first|upper }}
+
+                            {% endif %}
+
+                        </div>
+
+                        <!-- Nombre -->
+                        <div class="hidden sm:flex flex-col">
+
+                            <span class="font-bold text-sm text-gray-800 leading-tight">
+                                {{ user.first_name|default:user.username }}
+                            </span>
+
+                            <span class="text-[10px] text-gray-400 font-medium">
+                                Estudiante
+                            </span>
+
+                        </div>
+
+                        <i class="bi bi-chevron-down text-xs text-gray-400"></i>
+
+                    </summary>
+
+                    <!-- Opciones desplegables -->
+                    <div class="absolute right-0 top-full mt-3 w-52 bg-white border border-gray-200 rounded-xl shadow-xl p-2 z-50">
+
+                        <a href="{% url 'perfil' %}"
+                           class="flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-[#E8F8EE] hover:text-[#0B402B] rounded-lg transition">
+
+                            <i class="bi bi-person text-lg"></i>
+                            Mi perfil
+
+                        </a>
+
+                        <div class="border-t border-gray-100 my-1"></div>
+
+                        <form method="post" action="{% url 'logout' %}">
+                            {% csrf_token %}
+
+                            <button type="submit"
+                                    class="w-full flex items-center gap-3 px-4 py-3 text-sm text-red-600 hover:bg-red-50 rounded-lg text-left transition">
+
+                                <i class="bi bi-box-arrow-right text-lg"></i>
+                                Cerrar sesión
+
+                            </button>
+
+                        </form>
+
+                    </div>
+
+                </details>
+
+            </div>
+
+        </header>
+
+
+        <!-- CONTENIDO DE CADA INTERFAZ -->
+        {% block contenido %}
+
+        {% endblock %}
+
+    </main>
+
+</body>
+</html>

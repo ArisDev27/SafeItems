@@ -1,3 +1,8 @@
+from django.contrib import admin
+from django.urls import path, include
+from django.conf import settings
+from django.conf.urls.static import static
+
 """
 URL configuration for safeitems_core project.
 
@@ -22,3 +27,9 @@ urlpatterns = [
     # Esto le dice a Django: "Todo lo que llegue a la raíz, mándalo a gestion_objetos"
     path('', include('gestion_objetos.urls')), 
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(
+        settings.MEDIA_URL,
+        document_root=settings.MEDIA_ROOT
+    )

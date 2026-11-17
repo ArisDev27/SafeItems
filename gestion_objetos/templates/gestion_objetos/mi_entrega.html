@@ -1,0 +1,249 @@
+
+{% extends 'gestion_objetos/base.html' %}
+
+{% block titulo_documento %}
+Seguimiento de reclamación - SafeItems
+{% endblock %}
+
+{% block titulo_pagina %}
+Seguimiento de reclamación
+{% endblock %}
+
+{% block contenido %}
+
+<div class="max-w-3xl mx-auto p-5 md:p-8 space-y-5">
+
+    <a href="{% url 'mis_reportes' %}#mis-reclamaciones"
+       class="inline-flex items-center gap-2 text-sm font-semibold text-[#0B402B] hover:underline">
+
+        <i class="bi bi-arrow-left"></i>
+        Volver a mis reclamaciones
+
+    </a>
+
+    <section class="bg-white border border-gray-200 shadow-sm rounded-2xl p-6 md:p-8 space-y-6">
+
+        <div class="flex items-start gap-3">
+
+            <div class="w-12 h-12 shrink-0 bg-[#E8F8EE] rounded-xl flex items-center justify-center">
+                <i class="bi bi-clock-history text-xl text-[#0B402B]"></i>
+            </div>
+
+            <div class="min-w-0">
+                <h1 class="text-xl font-bold text-[#0B402B]">
+                    Seguimiento de tu reclamación
+                </h1>
+
+                <p class="text-sm text-gray-500 mt-1 break-words">
+                    {{ solicitud.objeto.titulo }}
+                </p>
+
+                <p class="text-xs text-gray-400 mt-1">
+                    Solicitud #{{ solicitud.id }}
+                </p>
+            </div>
+
+        </div>
+
+        <div>
+            <span class="px-3 py-1.5 rounded-full text-sm font-semibold
+                {% if solicitud.estado == 'PENDIENTE' %}
+                    bg-amber-100 text-amber-800
+                {% elif solicitud.estado == 'APROBADA' %}
+                    bg-green-100 text-green-800
+                {% elif solicitud.estado == 'RECHAZADA' %}
+                    bg-red-100 text-red-700
+                {% else %}
+                    bg-blue-100 text-blue-800
+                {% endif %}">
+
+                {{ solicitud.get_estado_display }}
+
+            </span>
+        </div>
+
+        <!-- HISTORIAL -->
+        <div>
+
+            <h2 class="font-bold text-lg text-[#0B402B] mb-4">
+                Historial del proceso
+            </h2>
+
+            <ol class="border-l-2 border-[#D0ECD7] ml-2 pl-5 space-y-6">
+
+                <!-- SOLICITUD ENVIADA -->
+                <li class="relative">
+
+                    <span class="absolute -left-[29px] top-1 w-4 h-4 rounded-full bg-[#0B402B] ring-4 ring-white"></span>
+
+                    <p class="font-semibold text-gray-800">
+                        Reclamación enviada
+                    </p>
+
+                    <p class="text-sm text-gray-500">
+                        {{ solicitud.fecha_solicitud|date:"d/m/Y H:i" }}
+                    </p>
+
+                    {% if solicitud.respuesta_verificada %}
+                        <p class="text-xs text-green-700 mt-1">
+                            Pregunta de seguridad verificada
+                        </p>
+                    {% endif %}
+
+                </li>
+
+                <!-- REVISIÓN DEL ADMINISTRADOR -->
+                <li class="relative">
+
+                    <span class="absolute -left-[29px] top-1 w-4 h-4 rounded-full
+                        {% if solicitud.estado == 'PENDIENTE' %}
+                            bg-amber-500
+                        {% elif solicitud.estado == 'RECHAZADA' %}
+                            bg-red-500
+                        {% else %}
+                            bg-green-600
+                        {% endif %} ring-4 ring-white"></span>
+
+                    {% if solicitud.estado == 'PENDIENTE' %}
+
+                        <p class="font-semibold text-gray-800">
+                            Esperando revisión del administrador
+                        </p>
+
+                        <p class="text-sm text-gray-500">
+                            La solicitud todavía no tiene una decisión.
+                        </p>
+
+                    {% elif solicitud.estado == 'RECHAZADA' %}
+
+                        <p class="font-semibold text-red-800">
+                            Reclamación rechazada
+                        </p>
+
+                        {% if solicitud.fecha_revision %}
+                            <p class="text-sm text-gray-500">
+                                {{ solicitud.fecha_revision|date:"d/m/Y H:i" }}
+                            </p>
+                        {% endif %}
+
+                    {% else %}
+
+                        <p class="font-semibold text-green-800">
+                            Reclamación aprobada
+                        </p>
+
+                        {% if solicitud.fecha_revision %}
+                            <p class="text-sm text-gray-500">
+                                {{ solicitud.fecha_revision|date:"d/m/Y H:i" }}
+                            </p>
+                        {% endif %}
+
+                    {% endif %}
+
+                </li>
+
+                <!-- ENTREGA DEL OBJETO -->
+                {% if solicitud.estado == 'APROBADA' or solicitud.estado == 'ENTREGADA' %}
+
+                    <li class="relative">
+
+                        <span class="absolute -left-[29px] top-1 w-4 h-4 rounded-full
+                            {% if solicitud.estado == 'ENTREGADA' %}
+                                bg-green-600
+                            {% else %}
+                                bg-amber-500
+                            {% endif %} ring-4 ring-white"></span>
+
+                        {% if solicitud.estado == 'ENTREGADA' %}
+
+                            <p class="font-semibold text-green-800">
+                                Entrega confirmada
+                            </p>
+
+                            {% if solicitud.fecha_entrega %}
+                                <p class="text-sm text-gray-500">
+                                    {{ solicitud.fecha_entrega|date:"d/m/Y H:i" }}
+                                </p>
+                            {% endif %}
+
+                            <p class="text-sm text-gray-600 mt-1">
+                                El caso está cerrado y el código ya no puede utilizarse.
+                            </p>
+
+                        {% else %}
+
+                            <p class="font-semibold text-gray-800">
+                                Entrega pendiente
+                            </p>
+
+                            <p class="text-sm text-gray-500">
+                                El administrador aún debe validar el código
+                                y confirmar la entrega física.
+                            </p>
+
+                        {% endif %}
+
+                    </li>
+
+                {% endif %}
+
+            </ol>
+
+        </div>
+
+        <!-- MOTIVO DEL RECHAZO -->
+        {% if solicitud.estado == 'RECHAZADA' and solicitud.observaciones_admin %}
+
+            <div class="bg-red-50 border border-red-200 rounded-xl p-4">
+
+                <h3 class="font-semibold text-sm text-red-800">
+                    Motivo registrado por el administrador
+                </h3>
+
+                <p class="text-sm text-red-700 mt-2 whitespace-pre-line break-words">
+                    {{ solicitud.observaciones_admin }}
+                </p>
+
+            </div>
+
+        {% endif %}
+
+        <!-- CONSERVAMOS LA VISUALIZACIÓN DEL CÓDIGO -->
+        {% if solicitud.estado == 'APROBADA' %}
+
+            {% if codigo %}
+
+                <div class="rounded-xl bg-[#E8F8EE] border border-green-200 text-center p-6">
+
+                    <h3 class="font-bold text-[#0B402B]">
+                        Tu código de entrega
+                    </h3>
+
+                    <p class="text-2xl sm:text-3xl font-bold text-[#0B402B] tracking-widest mt-3 select-all break-all">
+                        {{ codigo }}
+                    </p>
+
+                    <p class="text-xs text-gray-600 mt-3">
+                        Preséntalo en el punto de entrega.
+                        No lo compartas con otras personas.
+                        Solo puede utilizarse una vez.
+                    </p>
+
+                </div>
+
+            {% else %}
+
+                <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 text-sm text-amber-800">
+                    Tu solicitud fue aprobada, pero el código de entrega
+                    todavía no está disponible.
+                </div>
+
+            {% endif %}
+
+        {% endif %}
+
+    </section>
+
+</div>
+
+{% endblock %}

@@ -10,10 +10,13 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.1/ref/settings/
 """
 
+import os
 from pathlib import Path
+from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+load_dotenv(BASE_DIR / '.env')
 
 
 # Quick-start development settings - unsuitable for production
@@ -62,6 +65,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'gestion_objetos.context_processors.notificaciones_usuario',
             ],
         },
     },
@@ -107,7 +111,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/6.1/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'es'
 
 TIME_ZONE = 'UTC'
 
@@ -119,7 +123,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.1/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 
 
 # Email
@@ -127,6 +131,31 @@ STATIC_URL = 'static/'
 
 MAILERS = {
     'default': {
-        'BACKEND': 'django.core.mail.backends.console.EmailBackend',
+        'BACKEND': 'django.core.mail.backends.smtp.EmailBackend',
+        'OPTIONS': {
+            'host': 'smtp.gmail.com',
+            'port': 587,
+            'use_tls': True,
+            'username': os.environ.get('SAFEITEMS_EMAIL_USER', ''),
+            'password': os.environ.get('SAFEITEMS_EMAIL_APP_PASSWORD', ''),
+            'timeout': 15,
+        },
     },
 }
+
+DEFAULT_FROM_EMAIL = os.environ.get(
+    'SAFEITEMS_EMAIL_USER',
+    'noreply@safeitems.local'
+)
+PASSWORD_RESET_TIMEOUT = 3600
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
+
+# Cuentas autorizadas para entrar al panel de SafeItems
+SAFEITEMS_ADMIN_USERS = [
+    'f_mejia@unisimon.edu.co',
+    'correo_del_admin_2@ejemplo.com',
+    'correo_del_admin_3@ejemplo.com',
+]
