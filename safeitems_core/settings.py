@@ -80,11 +80,14 @@ WSGI_APPLICATION = 'safeitems_core.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'safeitems_db',      # El nombre de la base de datos que creamos en XAMPP
-        'USER': 'root',              # El usuario por defecto de XAMPP
-        'PASSWORD': '',              # En XAMPP la contraseña viene vacía por defecto
-        'HOST': 'localhost',
-        'PORT': '3306',
+        'NAME': os.environ.get('DB_NAME', 'defaultdb'),
+        'USER': os.environ.get('DB_USER', 'avnadmin'),
+        'PASSWORD': os.environ.get('DB_PASSWORD', ''),
+        'HOST': os.environ.get('DB_HOST', 'localhost'),
+        'PORT': os.environ.get('DB_PORT', '23766'),
+        'OPTIONS': {
+            'ssl': {'mode': 'REQUIRED'},
+        },
     }
 }
 
@@ -156,6 +159,6 @@ MEDIA_ROOT = BASE_DIR / 'media'
 # Cuentas autorizadas para entrar al panel de SafeItems
 SAFEITEMS_ADMIN_USERS = [
     'f_mejia@unisimon.edu.co',
-    'correo_del_admin_2@ejemplo.com',
+    'h_arismendi@unisimon.edu.co',
     'correo_del_admin_3@ejemplo.com',
 ]
